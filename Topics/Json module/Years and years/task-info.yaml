@@ -12,5 +12,8 @@ files:
     # convert years to JSON string
   learner_created: false
 feedback_link: https://hyperskill.org/learn/step/9003#comment
-status: Unchecked
+status: Solved
+feedback:
+  message: <html>Correct solution</html>
+  time: Fri, 17 Jun 2022 20:41:17 UTC
 record: -1
