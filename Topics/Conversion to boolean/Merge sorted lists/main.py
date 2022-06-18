@@ -2,9 +2,9 @@ def merge_arrays(a, b):
     # "c" will contain the result of merging arrays "a" and "b"
     c = []
     # CHECK that "a" or "b" are not empty
-    while ...:
+    while a or b:
         # CHECK that "b" is empty, or that "a" and "b" are not empty and compare the elements
-        if ...:
+        if not b or a and a[0] < b[0]:
             # removing the first element from "a" and adding it to "c"
             c.append(a[0])
             a.pop(0)
