@@ -1,0 +1,14 @@
+type: code
+files:
+- name: main.py
+  visible: true
+  text: |-
+    def solve():
+        # Write your code here
+  learner_created: false
+feedback_link: https://hyperskill.org/learn/step/10334#comment
+status: Solved
+feedback:
+  message: <html>Correct solution</html>
+  time: Sat, 18 Jun 2022 03:47:09 UTC
+record: -1
