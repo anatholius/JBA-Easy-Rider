@@ -1,5 +1,5 @@
 def compare(numerator, denominator):
-    return denominator and numerator / denominator == 0.5
+    return bool(denominator and numerator / denominator == 0.5)
 
 
 a = int(input())
