@@ -161,7 +161,7 @@ files:
 - name: easyrider/test_data.json
   visible: true
   learner_created: true
-feedback_link: https://hyperskill.org/projects/128/stages/680/implement#comment
+feedback_link: https://hyperskill.org/learn/step/10888#comment
 status: Solved
 feedback:
   message: Congratulations!
