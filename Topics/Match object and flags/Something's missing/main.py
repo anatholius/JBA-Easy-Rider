@@ -2,5 +2,5 @@ import re
 
 
 string = input()
-template = r'never gonna let you down...'
-match = re.match(template, string)
+template = 'never gonna let you down...'
+match = re.match(template, string, flags=re.I)
