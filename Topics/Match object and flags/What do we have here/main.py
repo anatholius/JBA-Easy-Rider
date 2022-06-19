@@ -1,3 +1,5 @@
 import re
 
-template = r'... Jude'
+template = '... Jude'
+match = re.match(template, input())
+print(match and match.group() or None)

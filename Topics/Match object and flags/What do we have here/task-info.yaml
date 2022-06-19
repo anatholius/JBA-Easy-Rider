@@ -9,5 +9,8 @@ files:
     template = r'... Jude'
   learner_created: false
 feedback_link: https://hyperskill.org/learn/step/12909#comment
-status: Unchecked
+status: Solved
+feedback:
+  message: <html>Correct solution</html>
+  time: Sun, 19 Jun 2022 18:41:22 UTC
 record: -1
