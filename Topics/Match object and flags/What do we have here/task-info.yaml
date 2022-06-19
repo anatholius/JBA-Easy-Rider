@@ -1,0 +1,13 @@
+type: code
+custom_name: What do we have here?
+files:
+- name: main.py
+  visible: true
+  text: |-
+    import re
+
+    template = r'... Jude'
+  learner_created: false
+feedback_link: https://hyperskill.org/learn/step/12909#comment
+status: Unchecked
+record: -1
