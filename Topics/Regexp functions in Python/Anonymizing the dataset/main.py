@@ -1,4 +1,6 @@
 import re
 
 string = input()
-# your code
+string = re.sub(r'@\w+', '<AUTHOR>', string, count=1)
+string = re.sub(r'@\w+', '<HANDLE>', string)
+print(string)
