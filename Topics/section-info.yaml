@@ -9,3 +9,4 @@ content:
 - Regexp quantifiers
 - Match object and flags
 - Regexp functions in Python
+- Regexp flags in Python
