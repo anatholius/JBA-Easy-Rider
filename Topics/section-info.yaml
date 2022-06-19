@@ -8,3 +8,4 @@ content:
 - Regexp sets and ranges
 - Regexp quantifiers
 - Match object and flags
+- Regexp functions in Python
