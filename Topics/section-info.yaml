@@ -7,3 +7,4 @@ content:
 - Shorthands
 - Regexp sets and ranges
 - Regexp quantifiers
+- Match object and flags
