@@ -1,0 +1,14 @@
+<h2>All we need is age</h2>
+<html>
+ <head></head>
+ <body>
+  <p>Suppose you have a numbered list of friends' names and their corresponding ages. For example:</p> 
+  <pre><code class="language-python">people = '''1. John 25
+            2. Mary 28
+            3. Lucy 45
+         '''</code></pre> 
+  <p>Here's a code for extracting only their age as a list using regexps. It produces the age at the end of each line:</p> 
+  <pre><code class="language-python">results = re.findall(r'\d+$', people, flags=X)</code></pre> 
+  <p>What flag should be used instead of <code class="language-python">X</code>? Use <strong>the short notation</strong>!</p>
+ </body>
+</html>
