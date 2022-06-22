@@ -1,6 +1,6 @@
 import re
 
 string = input()
-pattern = "(?<=@)\w+"
-results = re.match(pattern, string)
+pattern = r"(?<=@)\w+"
+results = re.search(pattern, string)
 print(results.group())
