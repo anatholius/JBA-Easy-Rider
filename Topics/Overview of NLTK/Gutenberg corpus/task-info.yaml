@@ -8,5 +8,8 @@ files:
     number = int(input()) # a row number of a sentence in Gutenberg corpus
   learner_created: false
 feedback_link: https://hyperskill.org/learn/step/20265#comment
-status: Unchecked
+status: Solved
+feedback:
+  message: <html>Correct solution</html>
+  time: Thu, 23 Jun 2022 01:22:19 UTC
 record: -1
