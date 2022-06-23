@@ -1,0 +1,12 @@
+type: code
+files:
+- name: main.py
+  visible: true
+  text: |-
+    # Don't download gutenberg corpus. Just import it
+
+    number = int(input()) # a row number of a sentence in Gutenberg corpus
+  learner_created: false
+feedback_link: https://hyperskill.org/learn/step/20265#comment
+status: Unchecked
+record: -1

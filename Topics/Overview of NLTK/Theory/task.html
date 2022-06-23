@@ -1,0 +1,81 @@
+<h2>Overview of NLTK</h2>
+<html>
+ <head></head>
+ <body>
+  <p><strong>NLTK</strong> (short for the Natural Language Toolkit) is a Python library for natural language processing (NLP). It provides several modules for various language-related tasks, including part-of-speech tagging, syntactic parsing, text classification, named-entity recognition, and so on. The library includes a lot of datasets and pre-trained models that are available for free. It is designed to support NLP researchers and learners. Apart from its practical application, NLTK is also good for starting with the methods of computational linguistics.</p> 
+  <h5 id="installation">Installation</h5> 
+  <p>To begin working with NLTK, we need to install it first. It can be easily done with the pip:</p> 
+  <pre><code class="language-python">pip install nltk</code></pre> 
+  <p>Now, If we want to use it, just import it at the beginning of our program:</p> 
+  <pre><code class="language-python">import nltk</code></pre> 
+  <p>Once you have installed the library, you may also want to download some external datasets and models. The datasets include, for instance, collections of classic literary works, samples of web conversations, movie reviews, as well as various lexical resources like sets of synonyms. As for the models, NLTK provides several models, for example, the pre-trained <a target="_blank" href="https://code.google.com/archive/p/word2vec/" rel="noopener noreferrer nofollow">word2vec</a>. It allows you to find out the relations between words. NLTK also has a couple of pre-trained models for sentiment analysis, and so forth. The whole list is available on the official NLTK site – <a target="_blank" href="https://www.nltk.org/nltk_data/" rel="noopener noreferrer nofollow">NLTK Data</a>. Use <code class="language-python">download()</code> to get to the resources:</p> 
+  <pre><code class="language-python">nltk.download()</code></pre> 
+  <p>The method without arguments opens the NLTK Downloader window. You can select the required data there. To obtain the entire collection, you need to choose "all" in the Collections tab. Alternatively, you can simply type <code class="language-python">all</code> as the function argument. It will get you the entire set:</p> 
+  <pre><code class="language-python">nltk.download('all')</code></pre> 
+  <p>Any package or collection of packages in NLTK can be downloaded the same way. Their IDs are the arguments of <code class="language-python">nltk.download()</code>, as in the example above.</p> 
+  <h5 id="advantages-and-disadvantages">Advantages and disadvantages</h5> 
+  <p>We have mentioned that NLTK, due to its academic nature, is a great starting point for studying NLP. The documentation is clear, easy to follow, and comes with a lot of examples. We would like to mention some other advantages also:</p> 
+  <ul> 
+   <li>NLTK is well suited for NLP tasks;</li> 
+   <li>External resources are easily accessible, and all the models are trained on reliable datasets;</li> 
+   <li>Texts are often supplied with annotations.</li> 
+  </ul> 
+  <p>However, there are some restrictions:</p> 
+  <ul> 
+   <li>NLTK is not a good choice for some tasks;</li> 
+   <li>Built-in models are not advanced. They are still good as a starting point;</li> 
+   <li>Even though the library supports some standard machine learning techniques, it does not provide any tools for neural networks training.</li> 
+  </ul> 
+  <p>To sum up, NLTK is a perfect tool for a quick analysis of your data. It can also help with pre-processing for further tasks.</p> 
+  <h5 id="nltk-applications">NLTK applications</h5> 
+  <p>Let's take a quick look at the applications of NLTK. Most of them will be discussed in detail later. Take a look at the table:</p> 
+  <table align="center" style="height: 591px; text-align: center; width: 385px;"> 
+   <tbody> 
+    <tr> 
+     <td><strong>Application</strong></td> 
+     <td><strong>NLTK modules</strong></td> 
+    </tr> 
+    <tr> 
+     <td>String processing</td> 
+     <td>tokenize, stem</td> 
+    </tr> 
+    <tr> 
+     <td>Accessing corpora</td> 
+     <td>corpus</td> 
+    </tr> 
+    <tr> 
+     <td>Collocation discovery</td> 
+     <td>collocations</td> 
+    </tr> 
+    <tr> 
+     <td>Part-of-speech tagging</td> 
+     <td>tag</td> 
+    </tr> 
+    <tr> 
+     <td>Syntactic analysis</td> 
+     <td>chunk, parse</td> 
+    </tr> 
+    <tr> 
+     <td>Machine learning</td> 
+     <td>classify, cluster</td> 
+    </tr> 
+    <tr> 
+     <td>Evaluation metrics</td> 
+     <td>metrics</td> 
+    </tr> 
+    <tr> 
+     <td>Probability and estimation</td> 
+     <td>probability</td> 
+    </tr> 
+   </tbody> 
+  </table> 
+  <p>Let's start with pre-processing. Several things should happen before any data processing. The first one is <strong>tokenization</strong>. It breaks raw textual data into smaller units (words, phrases, or any other entities). The second step is either <strong>lemmatization</strong> or <strong>stemming</strong>. Roughly speaking, that's where we normalize and reduce various word forms. The difference between processes will be discussed a bit later. NLTK has special modules for these procedures: <code class="language-python">nltk.tokenize</code> for the first one and <code class="language-python">nltk.stem</code> for lemmatization and stemming.</p> 
+  <p>We require additional pre-processing to remove high-frequency words, as such words have little value. NLTK contains wordlists of common words for several languages. Such words are called <strong>stopwords</strong>; they can be found in <code class="language-python">nltk.corpus.stopwords</code>. With the help of the same <code class="language-python">corpus</code> module, you can get access to other corpora of NLTK.</p> 
+  <p>The library is also good for other specific tasks, for example, <strong>collocation discovery</strong>. Collocations are two or more words that appear frequently together ("best friend", "make breakfast", "save time"). Such phrases can be extracted with the help of from <code class="language-python">nltk.collocations</code>.</p> 
+  <p>Another task is <strong>part-of-speech tagging</strong>. Annotation is done using the pre-trained model included in NLTK. It also has tools for <strong>chunking</strong>, a procedure related to part-of-speech tagging. It identifies syntactically related groups of sentences, such as noun phrases. Unlike plain part-of-speech tagging, chunking is not that useful for understanding the syntactic structure of a text. <strong>Parsing</strong> can assist you with a deep analysis of the text's syntactic organization. NLTK also contains a module that allows you to produce tree representations of the inner sentence structures.</p> 
+  <p>Another thing that NLTK can do is <strong>text classification </strong>and <strong>clustering </strong>for basic machine learning. To evaluate the performance of your NLP tasks, you can use the <strong>metrics </strong>provided in NLTK.</p> 
+  <p>Last but not the least, NLTK has ways of <strong>statistical counting</strong>. Most of them are included in the <code class="language-python">FreqDist</code> class of the <code class="language-python">nltk.probability</code> package. For example, you can learn about word frequency distributions in your text.</p> 
+  <h5 id="conclusion">Conclusion</h5> 
+  <p>In this topic, we have learned how to install the library and download its external resources, taken a look at the advantages and disadvantages, and outlined some of the modules that can be used for natural language processing tasks. Of course, NLTK provides much more possibilities. You can explore them by looking at the <a target="_blank" href="https://www.nltk.org/" rel="noopener noreferrer nofollow">NLTK documentation</a>.</p>
+ </body>
+</html>

@@ -1,0 +1,17 @@
+type: choice
+is_multiple_choice: false
+options:
+- text: <code>tokenize</code>
+- text: <code>chunk</code>
+- text: <code>parse</code>
+- text: <code>tag</code>
+files:
+- name: main.py
+  visible: true
+  text: |+
+    #  You can experiment here, it won’t be checked
+
+  learner_created: false
+feedback_link: https://hyperskill.org/learn/step/20266#comment
+status: Solved
+record: -1
