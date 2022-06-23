@@ -8,3 +8,4 @@ content:
 - The result of tokenization (1)
 - TreebankWordTokenizer
 - Creating a pattern for words
+- Tokenizing a particular sentence in the text
