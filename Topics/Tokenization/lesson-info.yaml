@@ -6,3 +6,4 @@ content:
 - Word tokens
 - The result of tokenization
 - The result of tokenization (1)
+- TreebankWordTokenizer
