@@ -39,6 +39,7 @@ class Spec:
     def __init__(self):
         self.errors = None
         self.correct_data = []
+        self.schedule = {}
 
     def fields(self):
         return self.requirements.items()
@@ -64,14 +65,29 @@ class Spec:
     def check(self, object_: dict):
         if self.errors is None:
             self.errors = {p: 0 for p, t in self.fields()}
+
+        valid_schedule = True
         for name, value in object_.items():
             error = self.is_satisfied_by(name, value)
             self.errors[name] += error
-            if not bool(error):
-                self.correct_data.append(object_)
+            if bool(error):
+                valid_schedule = False
+
+        # if object_ is valid schedule
+        if valid_schedule:
+            if object_['bus_id'] not in self.schedule:
+                self.schedule[object_['bus_id']] = {}
+
+            bus_id = object_['bus_id']
+            del object_['bus_id']
+            stop_id = object_['stop_id']
+            del object_['stop_id']
+
+            self.schedule[bus_id][stop_id] = object_
 
     def is_satisfied(self):
-        return not self.errors or not len(self.errors)
+        return not self.errors or self.errors and sum(
+            self.errors.values()) == 0
 
     def report(self):
         count = sum(self.errors.values())
@@ -82,8 +98,12 @@ class Spec:
               if self.is_important(p)]
         ], sep='\n', end='\n\n')
 
-    def get_correct(self):
-        return self.correct_data
+    def stops(self):
+        print(*[
+            'Line names and number of stops:',
+            *[f'bus_id: {bus_id}, stops: {len(sch.items())}'
+              for bus_id, sch in self.schedule.items()]
+        ], sep='\n', end='\n\n')
 
 
 class Scheduler:
@@ -96,10 +116,10 @@ class Scheduler:
         for record in self.db:
             spec.check(record)
 
-        spec.report()
-
-        # get only correct data
-        # self.data = self.spec.get_correct()
+        if not spec.is_satisfied():
+            spec.report()
+        else:
+            spec.stops()
 
 
 parser = argparse.ArgumentParser()
