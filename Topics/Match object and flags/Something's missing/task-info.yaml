@@ -1,0 +1,18 @@
+type: code
+files:
+- name: main.py
+  visible: true
+  text: |-
+    import re
+
+
+    string = input()
+    template = r'never gonna let you down...'
+    match = re.match(template, string)
+  learner_created: false
+feedback_link: https://hyperskill.org/learn/step/12908#comment
+status: Solved
+feedback:
+  message: <html>Correct solution</html>
+  time: Sun, 19 Jun 2022 18:34:02 UTC
+record: -1

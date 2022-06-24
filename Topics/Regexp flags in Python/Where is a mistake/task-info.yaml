@@ -1,0 +1,18 @@
+type: code
+custom_name: Where is a mistake?
+files:
+- name: main.py
+  visible: true
+  text: "import re \n\nstring = input()\ndates = re.compile('''^(0[1-9]|[12][0-9]|3[01])\
+    \  # digits from 01 to 31\n                   (/)                           #\
+    \ forward slash \n                   (0[1-9]|1[012])               # digits from\
+    \ 01 to 12\n                   (/)                           # forward slash\n\
+    \                   (19|20)\\d\\d$                  # 19 or 20 with any two digits\n\
+    \                   ''')\nresult = dates.match(string)\nprint(result)"
+  learner_created: false
+feedback_link: https://hyperskill.org/learn/step/14248#comment
+status: Solved
+feedback:
+  message: <html>Correct solution</html>
+  time: Sun, 19 Jun 2022 21:39:47 UTC
+record: -1

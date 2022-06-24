@@ -1,15 +1,39 @@
 import argparse
 import json
+import re
 
 
 class Spec:
+    """
+    Run program with `-t` or `--test` parameter to test with
+    `test_data.json` test sets
+    """
+
     requirements = {
         'bus_id': {'type': type(1), 'required': True},
         'stop_id': {'type': type(1), 'required': True},
-        'stop_name': {'type': type(''), 'required': True},
+        'stop_name': {
+            'type': type(''),
+            'required': True,
+            'match': lambda v: not re.match(
+                r'[A-Z]([\w\s]+)(Road|Avenue|Boulevard|Street)$', v)
+        },
         'next_stop': {'type': type(1), 'required': True},
-        'stop_type': {'type': type('d'), 'required': False, 'len': 1},
-        'a_time': {'type': type(''), 'required': True},
+        'stop_type': {
+            'type': type('d'),
+            'match': lambda v: bool(
+                # if not in 'SOF' or not empty -> increment errors
+                re.match('([^SOF])|(^"")', v)
+                or
+                # not len=1 + required=False (len=0) -> increment errors
+                len(re.findall('([SOF])', str(v))) > 1
+            )
+        },
+        'a_time': {
+            'type': type(''),
+            'required': True,
+            'match': lambda v: not re.match(r'([0-1]\d|2[0-3]):([0-5]\d)$', v),
+        },
     }
 
     def __init__(self):
@@ -19,15 +43,23 @@ class Spec:
     def fields(self):
         return self.requirements.items()
 
+    @staticmethod
+    def is_important(name):
+        return name in ('stop_name', 'stop_type', 'a_time')
+
     def is_satisfied_by(self, name, value) -> int:
-        return int(
+        return int(bool(
+            # check spec `type`
             type(value) != self.requirements[name]['type']
             or
+            # check spec `required`
+            'required' in self.requirements[name] and
             self.requirements[name]['required'] and not len(str(value))
             or
-            'len' in self.requirements[name] and
-            len(str(value)) > self.requirements[name]['len']
-        )
+            # check value `match` spec format
+            'match' in self.requirements[name] and
+            self.requirements[name]['match'](str(value))
+        ))
 
     def check(self, object_: dict):
         if self.errors is None:
@@ -44,8 +76,10 @@ class Spec:
     def report(self):
         count = sum(self.errors.values())
         print(*[
-            f'Type and required field validation: {count} errors',
-            *[f'{p}: {e}' for p, e in self.errors.items()]
+            f'Format validation: {count} errors',
+            *[f'{p}: {errors}'
+              for p, errors in self.errors.items()
+              if self.is_important(p)]
         ], sep='\n', end='\n\n')
 
     def get_correct(self):
@@ -62,7 +96,6 @@ class Scheduler:
         for record in self.db:
             spec.check(record)
 
-        # if not self.spec.is_satisfied():
         spec.report()
 
         # get only correct data

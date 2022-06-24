@@ -1,2 +1,18 @@
 content:
 - Json module
+- Conversion to boolean
+- Regexps in Python
+- Escaping in regexps
+- Taking input
+- Shorthands
+- Regexp sets and ranges
+- Regexp quantifiers
+- Match object and flags
+- Regexp functions in Python
+- Regexp flags in Python
+- Preconditions and postconditions
+- Groups and alternations
+- Overview of NLTK
+- Tokenization
+- Regexps in programs
+- Dictionary methods
