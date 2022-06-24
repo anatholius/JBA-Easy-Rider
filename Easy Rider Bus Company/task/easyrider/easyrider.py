@@ -27,7 +27,7 @@ class Spec:
         'a_time': {
             'type': type(''),
             'required': True,
-            'match': lambda v: not re.match(r'([0-1]\d|2[0-3]):([0-5]\d)', v),
+            'match': lambda v: not re.match(r'([0-1]\d|2[0-3]):([0-5]\d)$', v),
         },
     }
 
