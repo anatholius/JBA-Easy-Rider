@@ -60,6 +60,6 @@ def validate_date(string):
 # validate_date('01/12/0000')  # False
 # validate_date('29/02/1800')  # False
 # validate_date('01/01/2100')  # False - restriction 1800 <= t < 2099
-# validate_date('29/02/2100')  # False - not valid but also restricted here
+# validate_date('29/02/2100')  # False - restriction 1800 <= t < 2099
 # validate_date('16/12/2020')  # True
 validate_date(input())
