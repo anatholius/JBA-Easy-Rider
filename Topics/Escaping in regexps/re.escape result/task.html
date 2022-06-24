@@ -1,0 +1,17 @@
+<h2>re.escape result</h2>
+<html>
+ <head></head>
+ <body>
+  <p>Write down the string that <code class="language-python">re.escape()</code> <strong>returns</strong>, supposing that the version of Python is 3.7 or higher. </p> 
+  <pre><code class="language-python">string = 'Backslash?'
+string = re.escape(string)</code></pre> 
+  <p><button class="btn-sm btn-outline-secondary" onclick="getElementById('hint-299').style.display='inline'"> Hint </button> </p>
+  <div id="hint-299" style="display:none;">
+   Remember that 
+   <code class="language-python">re.escape()</code> escapes metacharacters by means of 
+   <em style="font-size: inherit;">two</em> backslashes. They turn into one backslash only when you output the string with 
+   <code class="language-python">print(string)</code>.
+  </div> 
+  <p></p>
+ </body>
+</html>

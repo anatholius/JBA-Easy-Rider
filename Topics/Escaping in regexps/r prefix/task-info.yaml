@@ -1,0 +1,17 @@
+type: choice
+is_multiple_choice: false
+options:
+- text: to cancel the backslashes' special meaning in regexp language
+- text: to automatically escape all special characters in the template
+- text: to cancel the backslashes' special meaning in Python's syntax
+- text: to avoid the need to escape special characters in the template
+files:
+- name: main.py
+  visible: true
+  text: |+
+    #  You can experiment here, it won’t be checked
+
+  learner_created: false
+feedback_link: https://hyperskill.org/learn/step/9756#comment
+status: Solved
+record: -1
