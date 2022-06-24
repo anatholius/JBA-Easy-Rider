@@ -12,3 +12,7 @@ content:
 - Regexp flags in Python
 - Preconditions and postconditions
 - Groups and alternations
+- Overview of NLTK
+- Tokenization
+- Regexps in programs
+- Dictionary methods
