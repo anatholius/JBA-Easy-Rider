@@ -4,6 +4,11 @@ import re
 
 
 class Spec:
+    """
+    Run program with `-t` or `--test` parameter to test with
+    `test_data.json` test sets
+    """
+
     requirements = {
         'bus_id': {'type': type(1), 'required': True},
         'stop_id': {'type': type(1), 'required': True},
@@ -91,7 +96,6 @@ class Scheduler:
         for record in self.db:
             spec.check(record)
 
-        # if not self.spec.is_satisfied():
         spec.report()
 
         # get only correct data
