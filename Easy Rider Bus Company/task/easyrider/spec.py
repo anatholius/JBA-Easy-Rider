@@ -184,6 +184,54 @@ class Spec:
                 )
             ], sep='\n', end='\n\n')
 
+    def check_time(self):
+        print("""
+- [x] The string containing the data in JSON format is passed to standard 
+input.
+- [ ] Check that the arrival time for the upcoming stops for a given bus 
+line is increasing.
+- [ ] If the arrival time for the next stop is earlier than or equal to the 
+time of the current stop, stop checking that bus line and remember the name 
+of the incorrect stop.
+- [ ] Display the information for those bus lines that have time anomalies. 
+For the correct stops, do not display anything.
+- [ ] If all the lines are correct timewise, print OK.
+- [ ] The output should have the same formatting as shown in the example.
+""")
+        print(self)
+
+        for line_id, line in self.lines.items():
+            print(f'Checking line: {line_id}', line)
+            for stop in line['stops']:
+                print(f'   Checking stop: {stop["stop_id"]}')
+                print(f'      stop({stop["stop_name"]}):', stop["a_time"])
+                # print(self.stops)
+                time = stop['a_time']
+                next_time = None
+                if stop["next_stop"] not in self.stops:
+                    print(
+                        f'      next_stop: There is no stop "'
+                        f'{stop["next_stop"]}"!!!\n\n')
+                else:
+                    # next_stop = self.stops[stop["next_stop"]]
+                    # print('self.lines', self.lines[line_id]['spec'])
+                    next_stop_id = self.lines[line_id]['spec']["next_stop"]
+                    next_stop = self.stops[next_stop_id]
+                    print('next_stop', next_stop)
+                    exit('Yeah, stop should have structure as well as lines')
+                    next_time = next_stop["a_time"]
+                    print(f'      next_stop({next_stop["stop_name"]}):', next_time)
+                    print('      is later?', time < next_time)
+
+                if next_time:
+                    if time < next_time:
+                        print('Everything is ok :)', time, next_time)
+                    else:
+                        print(f'This is not correct departure {next_time} for next stop !')
+                # else:
+                #     print('Everything is ok :)', time, next_time)
+        # exit('U need to check whats above!')
+
 
 if __name__ == '__MAIN__':
     print(Spec())

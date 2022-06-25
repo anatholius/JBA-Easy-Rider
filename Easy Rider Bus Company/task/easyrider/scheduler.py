@@ -20,6 +20,8 @@ class Scheduler:
                 end_points += 1
             self.spec.check(record)
 
+        self.spec.check_time()
+
         # Make sure each bus line has exactly one starting point (S) and one
         for line_id, line in self.spec.lines.items():
             start = False
@@ -47,7 +49,6 @@ class Scheduler:
         for stop_id, stop_spec in self.spec.stops.items():
             if len(stop_spec['lines']) > 1:
                 for line_id in stop_spec['lines']:
-                    # print()
                     if self.spec.stops[stop_id]['name'] \
                             not in self.spec.rtf['transfer']:
                         self.spec.rtf['transfer'][stop_id] = self.spec.stops[
