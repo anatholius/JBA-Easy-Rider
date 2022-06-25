@@ -16,3 +16,5 @@ content:
 - Tokenization
 - Regexps in programs
 - Dictionary methods
+- Itertools module
+- Set operations
