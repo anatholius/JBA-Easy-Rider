@@ -1,7 +1,7 @@
 import argparse
 import json
-from scheduler import Scheduler
 
+from scheduler import Scheduler
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-t', '--test', action='store_true')
