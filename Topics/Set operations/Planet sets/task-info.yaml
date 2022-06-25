@@ -8,5 +8,8 @@ files:
     set_3 = set(input().split())
   learner_created: false
 feedback_link: https://hyperskill.org/learn/step/8996#comment
-status: Unchecked
+status: Solved
+feedback:
+  message: <html>Correct solution</html>
+  time: Sat, 25 Jun 2022 01:07:07 UTC
 record: -1
