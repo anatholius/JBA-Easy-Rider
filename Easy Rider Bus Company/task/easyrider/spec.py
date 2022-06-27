@@ -96,7 +96,7 @@ class Spec:
             self.requirements[name]['match'](str(value))
         ))
 
-    def check(self, object_: dict):
+    def check(self, object_: dict) -> bool:
         if self.errors is None:
             self.errors = {p: 0 for p, t in self.fields()}
 
@@ -107,35 +107,36 @@ class Spec:
             if bool(error):
                 valid_schedule = False
 
+        return valid_schedule
         # if object_ is valid schedule
-        if valid_schedule:
-            if object_['bus_id'] not in self.schedule:
-                self.schedule[object_['bus_id']] = {}
-            if object_['bus_id'] not in self.lines:
-                self.lines[object_['bus_id']] = {
-                    'spec': object_,
-                    'stops': [],
-                }
-
-            bus_id = object_['bus_id']
-            stop_id = object_['stop_id']
-            self.lines[object_['bus_id']]['stops'].append(object_)
-
-            self.schedule[bus_id][stop_id] = object_
-
-            if object_['stop_type'] == 'S':
-                self.rtf['start'].append(object_)
-            elif object_['stop_type'] == 'F':
-                self.rtf['end'].append(object_)
-
-            if stop_id not in self.stops:
-                self.stops[stop_id] = {
-                    "name": object_['stop_name'],
-                    "lines": {}
-                }
-            if stop_id in self.stops:
-                self.stops[stop_id]['lines'][bus_id] = list(
-                    self.schedule[bus_id].keys())
+        # if valid_schedule:
+        #     if object_['bus_id'] not in self.schedule:
+        #         self.schedule[object_['bus_id']] = {}
+        #     if object_['bus_id'] not in self.lines:
+        #         self.lines[object_['bus_id']] = {
+        #             'spec': object_,
+        #             'stops': [],
+        #         }
+        #
+        #     bus_id = object_['bus_id']
+        #     stop_id = object_['stop_id']
+        #     self.lines[object_['bus_id']]['stops'].append(object_)
+        #
+        #     self.schedule[bus_id][stop_id] = object_
+        #
+        #     if object_['stop_type'] == 'S':
+        #         self.rtf['start'].append(object_)
+        #     elif object_['stop_type'] == 'F':
+        #         self.rtf['end'].append(object_)
+        #
+        #     if stop_id not in self.stops:
+        #         self.stops[stop_id] = {
+        #             "name": object_['stop_name'],
+        #             "lines": {}
+        #         }
+        #     if stop_id in self.stops:
+        #         self.stops[stop_id]['lines'][bus_id] = list(
+        #             self.schedule[bus_id].keys())
 
     def is_satisfied(self):
         return not self.errors or self.errors and sum(
@@ -220,14 +221,17 @@ For the correct stops, do not display anything.
                     print('next_stop', next_stop)
                     exit('Yeah, stop should have structure as well as lines')
                     next_time = next_stop["a_time"]
-                    print(f'      next_stop({next_stop["stop_name"]}):', next_time)
+                    print(f'      next_stop({next_stop["stop_name"]}):',
+                          next_time)
                     print('      is later?', time < next_time)
 
                 if next_time:
                     if time < next_time:
                         print('Everything is ok :)', time, next_time)
                     else:
-                        print(f'This is not correct departure {next_time} for next stop !')
+                        print(
+                            f'This is not correct departure {next_time} for '
+                            f'next stop !')
                 # else:
                 #     print('Everything is ok :)', time, next_time)
         # exit('U need to check whats above!')

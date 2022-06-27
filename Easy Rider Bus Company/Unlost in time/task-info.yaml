@@ -1,9 +1,5 @@
 type: edu
 files:
-- name: easyrider/easyrider.py
-  visible: true
-  text: '# Write your code here'
-  learner_created: false
 - name: tests.py
   visible: false
   text: "from hstest.stage_test import *\nfrom hstest.test_case import TestCase\n\
@@ -186,77 +182,6 @@ files:
     \ {result[0][x][1]}\")\n        return CheckResult.correct()\n\n\nif __name__\
     \ == '__main__':\n    EasyRiderStage5('easyrider.easyrider').run_tests()\n"
   learner_created: false
-- name: easyrider/scheduler.py
-  visible: true
-  text: |
-    from spec import Spec
-
-
-    class Scheduler:
-        db = []
-        data = []
-        spec = None
-
-        def validate(self, db):
-            self.spec = Spec()
-            self.db = db
-
-            start_points = 0
-            end_points = 0
-
-            for record in self.db:
-                if record['stop_type'] == 'S':
-                    start_points += 1
-                if record['stop_type'] == 'F':
-                    end_points += 1
-                self.spec.check(record)
-
-            # Make sure each bus line has exactly one starting point (S) and one
-            for line_id, line in self.spec.lines.items():
-                start = False
-                end = False
-                for s in line["stops"]:
-                    if not start and s['stop_type'] == 'S':
-                        start = True
-                    elif not end and s['stop_type'] == 'F':
-                        end = True
-                    elif s['stop_type'] == 'S':
-                        print(s['stop_type'])
-                        print((start, end))
-                        exit('So now start what?')
-                    elif s['stop_type'] == 'F':
-                        print(s['stop_type'])
-                        print((start, end))
-                        exit('So now end what?')
-
-                if not start or not end:
-                    m = f'There is no start or end stop for the line: {line_id}.'
-                    print(m)
-                    line['message'] = m
-                    return False
-
-            for stop_id, stop_spec in self.spec.stops.items():
-                if len(stop_spec['lines']) > 1:
-                    for line_id in stop_spec['lines']:
-                        # print()
-                        if self.spec.stops[stop_id]['name'] \
-                                not in self.spec.rtf['transfer']:
-                            self.spec.rtf['transfer'][stop_id] = self.spec.stops[
-                                stop_id]
-
-            show_stops = False
-            if self.spec.is_satisfied():
-                if show_stops:
-                    self.spec.stops_report()
-                else:
-                    self.spec.lines_report()
-            else:
-                self.spec.report()
-
-
-    if __name__ == '__MAIN__':
-        print(Scheduler())
-  learner_created: true
 - name: easyrider/spec.py
   visible: true
   text: |
@@ -660,31 +585,114 @@ files:
     Sunset Boulevard\", \"next_stop\": 0, \"stop_type\": \"F\", \"a_time\": \"08:16\"\
     }]\n]\n"
   learner_created: true
+- name: easyrider/entity/line.py
+  visible: true
+  learner_created: true
+- name: easyrider/entity/stop.py
+  visible: true
+  learner_created: true
+- name: easyrider/scheduler.py
+  visible: true
+  text: |
+    from spec import Spec
+
+
+    class Scheduler:
+        db = []
+        data = []
+        spec = None
+
+        def validate(self, db):
+            self.spec = Spec()
+            self.db = db
+
+            start_points = 0
+            end_points = 0
+
+            for record in self.db:
+                if record['stop_type'] == 'S':
+                    start_points += 1
+                if record['stop_type'] == 'F':
+                    end_points += 1
+                self.spec.check(record)
+
+            # Make sure each bus line has exactly one starting point (S) and one
+            for line_id, line in self.spec.lines.items():
+                start = False
+                end = False
+                for s in line["stops"]:
+                    if not start and s['stop_type'] == 'S':
+                        start = True
+                    elif not end and s['stop_type'] == 'F':
+                        end = True
+                    elif s['stop_type'] == 'S':
+                        print(s['stop_type'])
+                        print((start, end))
+                        exit('So now start what?')
+                    elif s['stop_type'] == 'F':
+                        print(s['stop_type'])
+                        print((start, end))
+                        exit('So now end what?')
+
+                if not start or not end:
+                    m = f'There is no start or end stop for the line: {line_id}.'
+                    print(m)
+                    line['message'] = m
+                    return False
+
+            for stop_id, stop_spec in self.spec.stops.items():
+                if len(stop_spec['lines']) > 1:
+                    for line_id in stop_spec['lines']:
+                        # print()
+                        if self.spec.stops[stop_id]['name'] \
+                                not in self.spec.rtf['transfer']:
+                            self.spec.rtf['transfer'][stop_id] = self.spec.stops[
+                                stop_id]
+
+            show_stops = False
+            if self.spec.is_satisfied():
+                if show_stops:
+                    self.spec.stops_report()
+                else:
+                    self.spec.lines_report()
+            else:
+                self.spec.report()
+
+
+    if __name__ == '__MAIN__':
+        print(Scheduler())
+  learner_created: true
+- name: easyrider/entity/trace.py
+  visible: true
+  learner_created: true
+- name: easyrider/entity/schedule.py
+  visible: true
+  learner_created: true
+- name: easyrider/easyrider.py
+  visible: true
+  text: '# Write your code here'
+  learner_created: false
 feedback_link: https://hyperskill.org/learn/step/10892#comment
 status: Failed
 feedback:
   message: |-
-    Wrong answer in test #2
+    Wrong answer in test #4
 
-    Wrong number of text lines in output. Found 6, expected 3.
+    Wrong number of text lines in output. Found 2, expected 4.
     Expected output:
 
     Arrival time test:
-    bus_id line 128: wrong time on station Fifth Avenue
-    bus_id line 256: wrong time on station Sunset Boulevard
+    bus_id line 256: wrong time on station Lombard Street
+    bus_id line 512: wrong time on station Elm Street
+    bus_id line 1024: wrong time on station Sesame Street
 
     Please find below the output of your program during this failed test.
     Note that the '>' character indicates the beginning of the input line.
 
     ---
 
-    > [{"bus_id" : 128, "stop_id" : 1, "stop_name" : "Prospekt Avenue", "next_stop" : 3, "stop_type" : "S", "a_time" : "08:12"}, {"bus_id" : 128, "stop_id" : 3, "stop_name" : "Elm Street", "next_stop" : 5, "stop_type" : "", "a_time" : "08:19"}, {"bus_id" : 128, "stop_id" : 5, "stop_name" : "Fifth Avenue", "next_stop" : 7, "stop_type" : "O", "a_time" : "08:17"}, {"bus_id" : 128, "stop_id" : 7, "stop_name" : "Sesame Street", "next_stop" : 0, "stop_type" : "F", "a_time" : "08:07"}, {"bus_id" : 256, "stop_id" : 2, "stop_name" : "Pilotow Street", "next_stop" : 3, "stop_type" : "S", "a_time" : "09:20"}, {"bus_id" : 256, "stop_id" : 3, "stop_name" : "Elm Street", "next_stop" : 6, "stop_type" : "", "a_time" : "09:45"}, {"bus_id" : 256, "stop_id" : 6, "stop_name" : "Sunset Boulevard", "next_stop" : 7, "stop_type" : "", "a_time" : "09:44"}, {"bus_id" : 256, "stop_id" : 7, "stop_name" : "Sesame Street", "next_stop" : 0, "stop_type" : "F", "a_time" : "10:12"}, {"bus_id" : 512, "stop_id" : 4, "stop_name" : "Bourbon Street", "next_stop" : 6, "stop_type" : "S", "a_time" : "08:13"}, {"bus_id" : 512, "stop_id" : 6, "stop_name" : "Sunset Boulevard", "next_stop" : 0, "stop_type" : "F", "a_time" : "08:16"}]
-
-    - [x] The string containing the data in JSON format is passed to standard input.
-    - [ ] Check that the arrival time for the upcoming stops for a given bus line is increasing.
-    - [ ] If the arrival time for the next stop is earlier than or equal to the time of the current stop, stop checking that bus line and remember the name of the incorrect stop.
-    - [ ] Display the information for those bus lines that have time anomalies. For the correct stops, do not display anything.
-    - [ ] If all the lines are correct timewise, print OK.
-    - [ ] The output should have the same formatting as shown in the example.
-  time: Sat, 25 Jun 2022 06:44:43 UTC
+    > [{"bus_id" : 128, "stop_id" : 1, "stop_name" : "Fifth Avenue", "next_stop" : 4, "stop_type" : "S", "a_time" : "08:12"}, {"bus_id" : 128, "stop_id" : 4, "stop_name" : "Abbey Road", "next_stop" : 5, "stop_type" : "", "a_time" : "08:19"},  {"bus_id" : 128, "stop_id" : 5, "stop_name" : "Santa Monica Boulevard", "next_stop" : 8, "stop_type" : "O", "a_time" : "08:25"},  {"bus_id" : 128, "stop_id" : 8, "stop_name" : "Elm Street", "next_stop" : 11, "stop_type" : "", "a_time" : "08:37"},  {"bus_id" : 128, "stop_id" : 11, "stop_name" : "Beale Street", "next_stop" : 12, "stop_type" : "", "a_time" : "09:20"},  {"bus_id" : 128, "stop_id" : 12, "stop_name" : "Sesame Street", "next_stop" : 14, "stop_type" : "", "a_time" : "09:45"},  {"bus_id" : 128, "stop_id" : 14, "stop_name" : "Bourbon Street", "next_stop" : 19, "stop_type" : "O", "a_time" : "09:59"},  {"bus_id" : 128, "stop_id" : 19, "stop_name" : "Prospekt Avenue", "next_stop" : 0, "stop_type" : "F", "a_time" : "10:12"},  {"bus_id" : 256, "stop_id" : 2, "stop_name" : "Pilotow Street", "next_stop" : 3, "stop_type" : "S", "a_time" : "08:13"},  {"bus_id" : 256, "stop_id" : 3, "stop_name" : "Startowa Street", "next_stop" : 8, "stop_type" : "", "a_time" : "08:16"},  {"bus_id" : 256, "stop_id" : 8, "stop_name" : "Elm Street", "next_stop" : 10, "stop_type" : "", "a_time" : "08:29"},  {"bus_id" : 256, "stop_id" : 10, "stop_name" : "Lombard Street", "next_stop" : 12, "stop_type" : "", "a_time" : "08:28"},  {"bus_id" : 256, "stop_id" : 12, "stop_name" : "Sesame Street", "next_stop" : 13, "stop_type" : "O", "a_time" : "08:27"},  {"bus_id" : 256, "stop_id" : 13, "stop_name" : "Orchard Road", "next_stop" : 16, "stop_type" : "", "a_time" : "08:42"},  {"bus_id" : 256, "stop_id" : 16, "stop_name" : "Sunset Boulevard", "next_stop" : 17, "stop_type" : "O", "a_time" : "09:26"},  {"bus_id" : 256, "stop_id" : 17, "stop_name" : "Khao San Road", "next_stop" : 20, "stop_type" : "O", "a_time" : "10:25"},  {"bus_id" : 256, "stop_id" : 20, "stop_name" : "Michigan Avenue", "next_stop" : 0, "stop_type" : "F", "a_time" : "11:26"},  {"bus_id" : 512, "stop_id" : 6, "stop_name" : "Arlington Road", "next_stop" : 7, "stop_type" : "S", "a_time" : "11:06"},  {"bus_id" : 512, "stop_id" : 7, "stop_name" : "Parizska Street", "next_stop" : 8, "stop_type" : "", "a_time" : "11:15"},  {"bus_id" : 512, "stop_id" : 8, "stop_name" : "Elm Street", "next_stop" : 9, "stop_type" : "", "a_time" : "11:06"},  {"bus_id" : 512, "stop_id" : 9, "stop_name" : "Niebajka Avenue", "next_stop" : 15, "stop_type" : "", "a_time" : "12:20"},  {"bus_id" : 512, "stop_id" : 15, "stop_name" : "Jakis Street", "next_stop" : 16, "stop_type" : "", "a_time" : "12:44"},  {"bus_id" : 512, "stop_id" : 16, "stop_name" : "Sunset Boulevard", "next_stop" : 18, "stop_type" : "", "a_time" : "13:01"},  {"bus_id" : 512, "stop_id" : 18, "stop_name" : "Jakas Avenue", "next_stop" : 19, "stop_type" : "", "a_time" : "14:00"},  {"bus_id" : 1024, "stop_id" : 21, "stop_name" : "Karlikowska Avenue", "next_stop" : 12, "stop_type" : "S", "a_time" : "13:01"},  {"bus_id" : 1024, "stop_id" : 12, "stop_name" : "Sesame Street", "next_stop" : 0, "stop_type" : "F", "a_time" : "13:00"},  {"bus_id" : 512, "stop_id" : 19, "stop_name" : "Prospekt Avenue", "next_stop" : 0, "stop_type" : "F", "a_time" : "14:11"}]
+    Arrival time test:
+    bus_id line 512: wrong time on station Elm Street
+  time: Mon, 27 Jun 2022 15:06:13 UTC
 record: -1
