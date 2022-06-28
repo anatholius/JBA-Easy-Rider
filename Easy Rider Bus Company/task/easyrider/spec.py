@@ -1,12 +1,11 @@
 import re
 
-from reports import Reports
-
 
 class Spec:
     """
-    Run program with `-t` or `--test` parameter to test with
-    `test_data.json` test sets
+    Specification pattern based class 🚀.
+
+    Here are predefined requirements, which are checked for given value.
     """
 
     requirements = {
@@ -35,17 +34,11 @@ class Spec:
             'match': lambda v: not re.match(r'([0-1]\d|2[0-3]):([0-5]\d)$', v),
         },
     }
-    reports: Reports
     report_support = False
 
     def __init__(self):
         self.error_messages = {}
         self.errors = None
-
-    def __str__(self):
-        if not isinstance(self.reports, Reports):
-            raise Exception('Reporting is not supported already on this stage')
-        return self.reports.__str__()
 
     def fields(self):
         return self.requirements.items()
@@ -57,10 +50,12 @@ class Spec:
         Checks basic propriety conditions:
          - type,
          - correct value if required
-         - match regex conditions specified in spec requirements for field
+         - match regex conditions specified in requirements for field format
 
         When spec is not satisfied by given value, function increases field
-        errors count
+        errors count.
+        Local tests prints detail data with error messages pointed to failed
+        fields
         """
 
         # check spec `type`
@@ -100,11 +95,6 @@ class Spec:
             if self.is_satisfied_by(name, value):
                 valid_schedule = False
 
-        # Previous stages reports
-        if self.report_support:
-            self.reports = Reports(self.errors)
-            self.reports.reports(valid_schedule, object_)
-
         return valid_schedule
 
     def is_satisfied(self):
@@ -113,7 +103,3 @@ class Spec:
                 or self.errors
                 and sum(self.errors.values()) == 0
         )
-
-
-if __name__ == '__MAIN__':
-    print(Spec())

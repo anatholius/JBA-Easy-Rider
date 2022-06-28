@@ -15,14 +15,8 @@ class Stop:
 
     def __str__(self, line_id: int = None):
         if line_id is not None:
-            print('self.lines', self.lines)
-            return 'Printing stop, line =', line_id
+            return 'Printing stop for line:', line_id
         else:
-            # print(f'Stop({self.stop_id}) "{self.stop_name}":')
-            # for line, spec in self.lines.items():
-            #     print(f'{line}:')
-            #     print(spec)
-            # return ''
             return """   Stop({stop_id}) "{stop_name}":
     {lines}""".format(
                 stop_id=self.stop_id,
