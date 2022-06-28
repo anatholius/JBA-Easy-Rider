@@ -1,0 +1,12 @@
+type: code
+files:
+- name: main.py
+  visible: true
+  text: "import re       \nnames = input()\n# your code here"
+  learner_created: false
+feedback_link: https://hyperskill.org/learn/step/14187#comment
+status: Solved
+feedback:
+  message: <html>Correct solution</html>
+  time: Sun, 19 Jun 2022 19:54:53 UTC
+record: -1

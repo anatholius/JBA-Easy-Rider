@@ -1,0 +1,17 @@
+type: choice
+is_multiple_choice: false
+options:
+- text: <code>re.match(regexp)</code>
+- text: <code>re.match(string)</code>
+- text: <code>re.match(string, regexp)</code>
+- text: <code>re.match(regexp, string)</code>
+files:
+- name: main.py
+  visible: true
+  text: |+
+    #  You can experiment here, it won’t be checked
+
+  learner_created: false
+feedback_link: https://hyperskill.org/learn/step/15197#comment
+status: Solved
+record: -1

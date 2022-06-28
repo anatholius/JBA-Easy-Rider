@@ -1,0 +1,17 @@
+type: code
+custom_name: What year is it?
+files:
+- name: main.py
+  visible: true
+  text: |-
+    import re
+
+    # define regex template
+    template = ''
+  learner_created: false
+feedback_link: https://hyperskill.org/learn/step/10039#comment
+status: Solved
+feedback:
+  message: <html>Correct solution</html>
+  time: Sun, 19 Jun 2022 15:48:38 UTC
+record: -1

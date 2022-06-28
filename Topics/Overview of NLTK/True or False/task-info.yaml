@@ -1,0 +1,18 @@
+type: choice
+is_multiple_choice: false
+options:
+- text: NLTK doesn’t have any built-in modules for learning data statistics
+- text: Neural networks training can be carried out by means of NLTK tools
+- text: NLTK provides the module for part-of-speech annotation
+- text: NLTK tools are suited only for the pre-processing of data
+files:
+- name: main.py
+  visible: true
+  text: |+
+    #  You can experiment here, it won’t be checked
+
+  learner_created: false
+feedback_link: https://hyperskill.org/learn/step/10024#comment
+status: Solved
+record: -1
+custom_name: True or False?

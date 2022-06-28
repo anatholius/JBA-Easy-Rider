@@ -1,0 +1,17 @@
+type: choice
+is_multiple_choice: true
+options:
+- text: The difference is in the syntax.
+- text: Only methods can accept a bunch of sets at once, in a certain way
+- text: Only operators can be used to update an existing set
+- text: Only operators can work with non-set arguments
+files:
+- name: main.py
+  visible: true
+  text: |+
+    #  You can experiment here, it won’t be checked
+
+  learner_created: false
+feedback_link: https://hyperskill.org/learn/step/8994#comment
+status: Solved
+record: -1

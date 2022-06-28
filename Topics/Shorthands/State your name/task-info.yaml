@@ -1,0 +1,16 @@
+type: code
+files:
+- name: main.py
+  visible: true
+  text: |-
+    import re
+
+
+    regex = ''
+  learner_created: false
+feedback_link: https://hyperskill.org/learn/step/10147#comment
+status: Solved
+feedback:
+  message: <html>Correct solution</html>
+  time: Fri, 24 Jun 2022 21:14:48 UTC
+record: -1
