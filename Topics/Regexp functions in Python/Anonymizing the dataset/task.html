@@ -1,0 +1,8 @@
+<h2>Anonymizing the dataset</h2>
+<html>
+ <head></head>
+ <body>
+  <p>Suppose you have collected a dataset of tweets. Each tweet in the dataset starts with a username, for example, <code class="java">@elonmusk</code>. They may contain references to other users that also start with the <code class="java">@</code> character. As it is very important to keep the collected data anonymous before working with it, your task is to replace usernames at the start of the string with the special <code class="java">&lt;AUTHOR&gt;</code> tag and all other handles with <code class="java">&lt;HANDLE&gt;</code>.</p> 
+  <p>You will get a tweet as input, print out the modified version of it.</p>
+ </body>
+</html><br><b>Sample Input:</b><br><pre><code class="language-no-highlight">@some_twitter_user I love dogs, @another_twitter_user!</code></pre><br><b>Sample Output:</b><br><pre><code class="language-no-highlight">&lt;AUTHOR&gt; I love dogs, &lt;HANDLE&gt;!</code></pre><br><br><br><font color="gray">Memory limit: 256 MB</font><br><font color="gray">Time limit: 15 seconds</font><br><br>

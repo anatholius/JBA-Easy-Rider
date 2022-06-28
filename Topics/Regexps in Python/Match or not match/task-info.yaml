@@ -1,0 +1,18 @@
+type: code
+custom_name: Match or not match?
+files:
+- name: main.py
+  visible: true
+  text: |-
+    import re
+
+
+    def matched(template, string):
+        ...
+  learner_created: false
+feedback_link: https://hyperskill.org/learn/step/9474#comment
+status: Solved
+feedback:
+  message: <html>Correct solution</html>
+  time: Sat, 18 Jun 2022 05:56:05 UTC
+record: -1

@@ -126,6 +126,280 @@ files:
     \                  f\"Wrong stop type: {list(result)}\")\n        return CheckResult.correct()\n\
     \n\nif __name__ == '__main__':\n    EasyRiderStage6('easyrider.easyrider').run_tests()\n"
   learner_created: false
-feedback_link: https://hyperskill.org/projects/128/stages/685/implement#comment
-status: Unchecked
+- name: easyrider/entity/trace.py
+  visible: true
+  text: |
+    from .stop import Stop
+
+
+    class Trace:
+
+        def __init__(self):
+            self._index = 0
+            self.messages = []
+            self.stops: [Stop] | list = []
+
+        def __next__(self):
+            if self._index < len(self.stops):
+                result = self.stops[self._index]
+                self._index += 1
+                return result
+
+            raise StopIteration
+
+        def add_stop(self, stop: Stop, line_id, time):
+            if stop not in self.stops:
+                line = stop.lines[line_id]
+
+                if not line or line[-1] < time:
+                    line.append(time)
+                    self.stops.append(stop)
+
+        def is_valid_time(self, stop):
+            if len(self.stops):
+                last_stop_time = list(self.stops[-1].lines.values())[-1][-1]
+                current_stop_time = list(stop.lines.values())[-1][-1]
+                return last_stop_time < current_stop_time
+  learner_created: true
+- name: easyrider/entity/stop.py
+  visible: true
+  text: |
+    class Stop:
+        _wrong_type = False
+        transfer = False
+        on_demand = False
+
+        def __init__(self, spec):
+            self.stop_id = spec['stop_id']
+            self.stop_name = spec['stop_name']
+            if spec['stop_type'] == 'O':
+                self.on_demand = True
+
+            self.lines = {}
+            if spec['bus_id'] not in self.lines.keys():
+                self.lines[spec['bus_id']] = []
+
+        def __str__(self, line_id: int = None):
+            if line_id is not None:
+                print('self.lines', self.lines)
+                return 'Printing stop, line =', line_id
+            else:
+                # print(f'Stop({self.stop_id}) "{self.stop_name}":')
+                # for line, spec in self.lines.items():
+                #     print(f'{line}:')
+                #     print(spec)
+                # return ''
+                return """   Stop({stop_id}) "{stop_name}":
+        {lines}""".format(
+                    stop_id=self.stop_id,
+                    stop_name=self.stop_name,
+                    lines=f'\n'.join([
+                        f'{line}: {", ".join(hours)}' for line, hours in
+                        self.lines.items()
+                    ])
+                )
+
+        def add_line(self, spec):
+            self.lines[spec['bus_id']] = []
+            print(f'Added line to stop "{self.stop_name}"', len(self.lines.keys()))
+            if len(self.lines.keys()) > 1:
+                self.transfer = True
+            if self.transfer and self.on_demand:
+                self._wrong_type = True
+            if spec['stop_type'] in 'SF' and self.on_demand:
+                self._wrong_type = True
+
+        def has_wrong_type(self):
+            return self._wrong_type
+  learner_created: true
+- name: easyrider/spec.py
+  visible: true
+  text: |
+    import re
+
+    from reports import Reports
+
+
+    class Spec:
+        """
+        Run program with `-t` or `--test` parameter to test with
+        `test_data.json` test sets
+        """
+
+        requirements = {
+            'bus_id': {'type': type(1), 'required': True},
+            'stop_id': {'type': type(1), 'required': True},
+            'stop_name': {
+                'type': type(''),
+                'required': True,
+                'match': lambda v: not re.match(
+                    r'[A-Z]([\w\s]+)(Road|Avenue|Boulevard|Street)$', v)
+            },
+            'next_stop': {'type': type(1), 'required': True},
+            'stop_type': {
+                'type': type('d'),
+                'match': lambda v: bool(
+                    # if not in 'SOF' or not empty -> increment errors
+                    re.match('([^SOF])|(^"")', v)
+                    or
+                    # not len=1 + required=False (len=0) -> increment errors
+                    len(re.findall('([SOF])', str(v))) > 1
+                )
+            },
+            'a_time': {
+                'type': type(''),
+                'required': True,
+                'match': lambda v: not re.match(r'([0-1]\d|2[0-3]):([0-5]\d)$', v),
+            },
+        }
+        reports: Reports
+        report_support = False
+
+        def __init__(self):
+            self.error_messages = {}
+            self.errors = None
+
+        def __str__(self):
+            if not isinstance(self.reports, Reports):
+                raise Exception('Reporting is not supported already on this stage')
+            return self.reports.__str__()
+
+        def fields(self):
+            return self.requirements.items()
+
+        def is_satisfied_by(self, name, value) -> bool:
+            """
+            Pattern: Specification.
+
+            Checks basic propriety conditions:
+             - type,
+             - correct value if required
+             - match regex conditions specified in spec requirements for field
+
+            When spec is not satisfied by given value, function increases field
+            errors count
+            """
+
+            # check spec `type`
+            incorrect_type = type(value) != self.requirements[name]['type']
+            # check spec `required`
+            incorrect_required = (
+                    'required' in self.requirements[name] and
+                    self.requirements[name]['required'] and not len(str(value))
+            )
+            # check value `match` spec format
+            incorrect_regex = (
+                    'match' in self.requirements[name] and
+                    self.requirements[name]['match'](str(value))
+            )
+            has_errors = bool(
+                incorrect_type or incorrect_required or incorrect_regex
+            )
+            if has_errors:
+                self.error_messages[name] = []
+                if incorrect_type:
+                    self.error_messages[name].append(f'Incorrect type')
+                if incorrect_required:
+                    self.error_messages[name].append(f'Missing required value')
+                if incorrect_regex:
+                    self.error_messages[name].append(f'Incorrect format')
+
+            self.errors[name] += int(has_errors)
+
+            return has_errors
+
+        def check(self, object_: dict) -> bool:
+            if self.errors is None:
+                self.errors = {p: 0 for p, t in self.fields()}
+
+            valid_schedule = True
+            for name, value in object_.items():
+                if self.is_satisfied_by(name, value):
+                    valid_schedule = False
+
+            # Previous stages reports
+            if self.report_support:
+                self.reports = Reports(self.errors)
+                self.reports.reports(valid_schedule, object_)
+
+            return valid_schedule
+
+        def is_satisfied(self):
+            return (
+                    not self.errors
+                    or self.errors
+                    and sum(self.errors.values()) == 0
+            )
+
+
+    if __name__ == '__MAIN__':
+        print(Spec())
+  learner_created: true
+- name: easyrider/entity/schedule.py
+  visible: true
+  text: |
+    from .stop import Stop
+    from .trace import Trace
+
+
+    class Schedule:
+        """
+        Schedule for given bus line
+        """
+
+        line = None
+        trace = None
+
+        def __init__(self, spec):
+            if not self.line:
+                self.line = spec['bus_id']
+            time = spec['a_time']
+            stop = Stop(spec)
+            if not self.trace:
+                self.trace = Trace()
+
+            self.trace.add_stop(stop, self.line, time)
+
+        def show(self, stop_id: str | None = None):
+            if stop_id is None:
+                return ', '.join([f'{stop}' for stop in self.trace.stops])
+            else:
+                return [stop for stop in self.trace.stops][0]
+
+        def add(self, spec):
+            self.trace.add_stop(Stop(spec), spec['bus_id'], spec['a_time'])
+  learner_created: true
+- name: easyrider/test_data.json
+  visible: true
+  text: |
+    [
+      [{"bus_id": 128,"stop_id": 1,"stop_name": "Prospekt Avenue","next_stop": 3,"stop_type": "S","a_time": 8.12},{"bus_id": 128,"stop_id": 3,"stop_name": "","next_stop": 5,"stop_type": "","a_time": "08:19"},{"bus_id": 128,"stop_id": 5,"stop_name": "Fifth Avenue","next_stop": 7,"stop_type": "O","a_time": "08:25"},{"bus_id": 128,"stop_id": "7","stop_name": "Sesame Street","next_stop": 0,"stop_type": "F","a_time": "08:37"},{"bus_id": "","stop_id": 2,"stop_name": "Pilotow Street","next_stop": 3,"stop_type": "S","a_time": ""},{"bus_id": 256,"stop_id": 3,"stop_name": "Elm Street","next_stop": 6,"stop_type": "","a_time": "09:45"},{"bus_id": 256,"stop_id": 6,"stop_name": "Sunset Boulevard","next_stop": 7,"stop_type": "","a_time": "09:59"},{"bus_id": 256,"stop_id": 7,"stop_name": "Sesame Street","next_stop": "0","stop_type": "F","a_time": "10:12"},{"bus_id": 512,"stop_id": 4,"stop_name": "Bourbon Street","next_stop": 6,"stop_type": "S","a_time": "08:13"},{"bus_id": "512","stop_id": 6,"stop_name": "Sunset Boulevard","next_stop": 0,"stop_type": 5,"a_time": "08:16"}],
+      [{"bus_id": 128,"stop_id": 1,"stop_name": "Fifth Avenue","next_stop": 4,"stop_type": "S","a_time": "08:12"},{"bus_id": 128,"stop_id": 4,"stop_name": "Abbey Road","next_stop": 5,"stop_type": "","a_time": "08:19"},{"bus_id": 128,"stop_id": 5,"stop_name": "Santa Monica Boulevard","next_stop": 8,"stop_type": "O","a_time": "08:25"},{"bus_id": 128,"stop_id": 8,"stop_name": "Elm Street","next_stop": 11,"stop_type": "","a_time": "08:37"},{"bus_id": 128,"stop_id": 11,"stop_name": "Beale Street","next_stop": 12,"stop_type": "","a_time": "09:20"},{"bus_id": 128,"stop_id": 12,"stop_name": "Sesame Street","next_stop": 14,"stop_type": "","a_time": "09:45"},{"bus_id": 128,"stop_id": 14,"stop_name": "Bourbon Street","next_stop": 19,"stop_type": "O","a_time": "09:59"},{"bus_id": 128,"stop_id": 19,"stop_name": "Prospekt Avenue","next_stop": 0,"stop_type": "F","a_time": "10:12"},{"bus_id": 256,"stop_id": 2,"stop_name": "Pilotow Street","next_stop": 3,"stop_type": "S","a_time": "08:13"},{"bus_id": 256,"stop_id": 3,"stop_name": "Startowa Street","next_stop": 8,"stop_type": "","a_time": "08:16"},{"bus_id": 256,"stop_id": 8,"stop_name": "Elm Street","next_stop": 10,"stop_type": "","a_time": "08:29"},{"bus_id": 256,"stop_id": 10,"stop_name": "Lombard Street","next_stop": 12,"stop_type": "","a_time": "08:44"},{"bus_id": 256,"stop_id": 12,"stop_name": "Sesame Street","next_stop": 13,"stop_type": "O","a_time": "08:46"},{"bus_id": 256,"stop_id": 13,"stop_name": "Orchard Road","next_stop": 16,"stop_type": "","a_time": "09:13"},{"bus_id": 256,"stop_id": 16,"stop_name": "Sunset Boulevard","next_stop": 17,"stop_type": "O","a_time": "09:26"},{"bus_id": 256,"stop_id": 17,"stop_name": "Khao San Road","next_stop": 20,"stop_type": "O","a_time": "10:25"},{"bus_id": 256,"stop_id": 20,"stop_name": "Michigan Avenue","next_stop": 0,"stop_type": "F","a_time": "11:26"},{"bus_id": 512,"stop_id": 6,"stop_name": "Arlington Road","next_stop": 7,"stop_type": "S","a_time": "11:06"},{"bus_id": 512,"stop_id": 7,"stop_name": "Parizska Street","next_stop": 8,"stop_type": "","a_time": "11:15"},{"bus_id": 512,"stop_id": 8,"stop_name": "Elm Street","next_stop": 9,"stop_type": "","a_time": "11:56"},{"bus_id": 512,"stop_id": 9,"stop_name": "Niebajka Avenue","next_stop": 15,"stop_type": "","a_time": "12:20"},{"bus_id": 512,"stop_id": 15,"stop_name": "Jakis Street","next_stop": 16,"stop_type": "","a_time": "12:44"},{"bus_id": 512,"stop_id": 16,"stop_name": "Sunset Boulevard","next_stop": 18,"stop_type": "","a_time": "13:01"},{"bus_id": 512,"stop_id": 18,"stop_name": "Jakas Avenue","next_stop": 19,"stop_type": "","a_time": "14:00"},{"bus_id": 1024,"stop_id": 21,"stop_name": "Karlikowska Avenue","next_stop": 12,"stop_type": "S","a_time": "13:01"},{"bus_id": 1024,"stop_id": 12,"stop_name": "Sesame Street","next_stop": 0,"stop_type": "F","a_time": "14:00"},{"bus_id": 512,"stop_id": 19,"stop_name": "Prospekt Avenue","next_stop": 0,"stop_type": "F","a_time": "14:11"}],
+      [{"bus_id": 128,"stop_id": 1,"stop_name": "Fifth Avenue","next_stop": 4,"stop_type": "S","a_time": "08:12"},{"bus_id": 128,"stop_id": 4,"stop_name": "abbey Road","next_stop": 5,"stop_type": "","a_time": "08:19"},{"bus_id": 128,"stop_id": 5,"stop_name": "Santa Monica Boulevard","next_stop": 8,"stop_type": "O","a_time": "08:25"},{"bus_id": 128,"stop_id": 8,"stop_name": "Elm Street Str.","next_stop": "11","stop_type": "","a_time": "08:37"},{"bus_id": 128,"stop_id": 11,"stop_name": "Beale Street","next_stop": 12,"stop_type": "","a_time": "09:20"},{"bus_id": 128,"stop_id": 12,"stop_name": 9,"next_stop": 14,"stop_type": "","a_time": "09:45"},{"bus_id": 128,"stop_id": "five","stop_name": "Bourbon street","next_stop": 19,"stop_type": "O","a_time": "09:59"},{"bus_id": 128,"stop_id": 19,"stop_name": "","next_stop": 0,"stop_type": "F","a_time": "10:12"},{"bus_id": 256,"stop_id": 2,"stop_name": "Pilotow Street","next_stop": 3,"stop_type": "S","a_time": "08:13"},{"bus_id": "","stop_id": "","stop_name": "Startowa Street","next_stop": 8,"stop_type": 23.9,"a_time": 8},{"bus_id": 256,"stop_id": 8,"stop_name": "Elm","next_stop": 10,"stop_type": "","a_time": "08:29"},{"bus_id": 256,"stop_id": 10,"stop_name": "Lombard Street","next_stop": 12,"stop_type": "","a_time": "08:44"},{"bus_id": 256,"stop_id": 12,"stop_name": "Sesame Street","next_stop": "","stop_type": "O","a_time": "08:46"},{"bus_id": 256,"stop_id": 13,"stop_name": 34.6,"next_stop": 16,"stop_type": "","a_time": "09:13"},{"bus_id": "eleven","stop_id": 16,"stop_name": "Sunset Boullevard","next_stop": 17.4,"stop_type": "O","a_time": "09:26"},{"bus_id": 256,"stop_id": 17,"stop_name": "Khao San Road","next_stop": 20,"stop_type": "O","a_time": "10:25"},{"bus_id": 256,"stop_id": 20,"stop_name": "Michigan Avenue","next_stop": 0,"stop_type": "F","a_time": "11:26"},{"bus_id": 512,"stop_id": 6,"stop_name": "Arlington Road","next_stop": 7,"stop_type": "S","a_time": "11:06"},{"bus_id": 512,"stop_id": 7,"stop_name": "Parizska St.","next_stop": 8,"stop_type": "","a_time": "11:15"},{"bus_id": 512,"stop_id": 8,"stop_name": "Elm Street","next_stop": 9,"stop_type": "","a_time": "11:56"},{"bus_id": 512,"stop_id": 9,"stop_name": "Niebajka Av.","next_stop": 15,"stop_type": "","a_time": "12:20"},{"bus_id": 512,"stop_id": 15,"stop_name": "Jakis Street","next_stop": 16,"stop_type": "","a_time": "12:44"},{"bus_id": 512,"stop_id": 16,"stop_name": "Sunset Boulevard","next_stop": 18,"stop_type": "","a_time": "13:01"},{"bus_id": 512,"stop_id": 18,"stop_name": "Jakas Avenue","next_stop": 19,"stop_type": 3,"a_time": "14:00"},{"bus_id": 1024,"stop_id": "21","stop_name": "Karlikowska Avenue","next_stop": 12,"stop_type": "S","a_time": 13.01},{"bus_id": 1024,"stop_id": 12,"stop_name": "Sesame Street","next_stop": 0,"stop_type": "FF","a_time": ""},{"bus_id": "","stop_id": 19,"stop_name": "Prospekt Avenue","next_stop": 0,"stop_type": "F","a_time": "14:11"}],
+      [{"bus_id": 128,"stop_id": 1,"stop_name": "Prospekt Av.","next_stop": 3,"stop_type": "S","a_time": "08:12"},{"bus_id": 128,"stop_id": 3,"stop_name": "Elm Street","next_stop": 5,"stop_type": "","a_time": "8:19"},{"bus_id": 128,"stop_id": 5,"stop_name": "Fifth Avenue","next_stop": 7,"stop_type": "OO","a_time": "08:25"},{"bus_id": 128,"stop_id": 7,"stop_name": "Sesame Street","next_stop": 0,"stop_type": "F","a_time": "08:77"},{"bus_id": 256,"stop_id": 2,"stop_name": "Pilotow Street","next_stop": 3,"stop_type": "S","a_time": "09:20"},{"bus_id": 256,"stop_id": 3,"stop_name": "Elm","next_stop": 6,"stop_type": "","a_time": "09:45"},{"bus_id": 256,"stop_id": 6,"stop_name": "Sunset Boulevard","next_stop": 7,"stop_type": "A","a_time": "09:59"},{"bus_id": 256,"stop_id": 7,"stop_name": "Sesame Street","next_stop": 0,"stop_type": "F","a_time": "10.12"},{"bus_id": 512,"stop_id": 4,"stop_name": "bourbon street","next_stop": 6,"stop_type": "S","a_time": "38:13"},{"bus_id": 512,"stop_id": 6,"stop_name": "Sunset Boulevard","next_stop": 0,"stop_type": "F","a_time": "08:16"}],
+      [{"bus_id": 128,"stop_id": 1,"stop_name": "Fifth Avenue","next_stop": 4,"stop_type": "S","a_time": "08:12"},{"bus_id": 128,"stop_id": 4,"stop_name": "abbey Road","next_stop": 5,"stop_type": "FF","a_time": "08:19"},{"bus_id": 128,"stop_id": 5,"stop_name": "Santa Monica Boulevard","next_stop": 8,"stop_type": "O","a_time": "two"},{"bus_id": 128,"stop_id": 8,"stop_name": "Elm Street Str.","next_stop": 11,"stop_type": "","a_time": "08:37"},{"bus_id": 128,"stop_id": 11,"stop_name": "Beale Street","next_stop": 12,"stop_type": "","a_time": "39:20"},{"bus_id": 128,"stop_id": 12,"stop_name": "Sesame Street","next_stop": 14,"stop_type": "","a_time": "09:95"},{"bus_id": 128,"stop_id": 14,"stop_name": "Bourbon street","next_stop": 19,"stop_type": "O","a_time": "09:59"},{"bus_id": 128,"stop_id": 19,"stop_name": "Avenue","next_stop": 0,"stop_type": "F","a_time": "10:12"},{"bus_id": 256,"stop_id": 2,"stop_name": "Pilotow Street","next_stop": 3,"stop_type": "S","a_time": "08.13"},{"bus_id": 256,"stop_id": 3,"stop_name": "Startowa Street","next_stop": 8,"stop_type": "d","a_time": "08:16"},{"bus_id": 256,"stop_id": 8,"stop_name": "Elm","next_stop": 10,"stop_type": "","a_time": "08:29"},{"bus_id": 256,"stop_id": 10,"stop_name": "Lombard Street","next_stop": 12,"stop_type": "","a_time": "08;44"},{"bus_id": 256,"stop_id": 12,"stop_name": "Sesame Street","next_stop": 13,"stop_type": "O","a_time": "08:46"},{"bus_id": 256,"stop_id": 13,"stop_name": "Orchard Road","next_stop": 16,"stop_type": "","a_time": "09:13"},{"bus_id": 256,"stop_id": 16,"stop_name": "Sunset Boullevard","next_stop": 17,"stop_type": "O","a_time": "09:26"},{"bus_id": 256,"stop_id": 17,"stop_name": "Khao San Road","next_stop": 20,"stop_type": "o","a_time": "10:25"},{"bus_id": 256,"stop_id": 20,"stop_name": "Michigan Avenue","next_stop": 0,"stop_type": "F","a_time": "11:26"},{"bus_id": 512,"stop_id": 6,"stop_name": "Arlington Road","next_stop": 7,"stop_type": "s","a_time": "11:06"},{"bus_id": 512,"stop_id": 7,"stop_name": "Parizska St.","next_stop": 8,"stop_type": "","a_time": "11:15"},{"bus_id": 512,"stop_id": 8,"stop_name": "Elm Street","next_stop": 9,"stop_type": "","a_time": "11:76"},{"bus_id": 512,"stop_id": 9,"stop_name": "Niebajka Av.","next_stop": 15,"stop_type": "","a_time": "12:20"},{"bus_id": 512,"stop_id": 15,"stop_name": "Jakis Street","next_stop": 16,"stop_type": "","a_time": "12:44"},{"bus_id": 512,"stop_id": 16,"stop_name": "Sunset Boulevard","next_stop": 18,"stop_type": "","a_time": "13:01"},{"bus_id": 512,"stop_id": 18,"stop_name": "Jakas Avenue","next_stop": 19,"stop_type": "","a_time": "14:00"},{"bus_id": 1024,"stop_id": 21,"stop_name": "Karlikowska Avenue","next_stop": 12,"stop_type": "S","a_time": "13:01"},{"bus_id": 1024,"stop_id": 12,"stop_name": "Sesame Street","next_stop": 0,"stop_type": "F","a_time": "14:00:00"},{"bus_id": 1024,"stop_id": 19,"stop_name": "Prospekt Avenue","next_stop": 0,"stop_type": "F","a_time": "14:11"}],
+      [{"bus_id": 128,"stop_id": 1,"stop_name": "Prospekt Avenue","next_stop": 3,"stop_type": "S","a_time": "08:12"},{"bus_id": 128,"stop_id": 3,"stop_name": "Elm Street","next_stop": 5,"stop_type": "","a_time": "08:19"},{"bus_id": 128,"stop_id": 5,"stop_name": "Fifth Avenue","next_stop": 7,"stop_type": "O","a_time": "08:25"},{"bus_id": 128,"stop_id": 7,"stop_name": "Sesame Street","next_stop": 0,"stop_type": "F","a_time": "08:37"},{"bus_id": 512,"stop_id": 4,"stop_name": "Bourbon Street","next_stop": 6,"stop_type": "","a_time": "08:13"},{"bus_id": 512,"stop_id": 6,"stop_name": "Sunset Boulevard","next_stop": 0,"stop_type": "F","a_time": "08:16"}],
+      [{"bus_id": 128,"stop_id": 1,"stop_name": "Prospekt Avenue","next_stop": 3,"stop_type": "S","a_time": "08:12"},{"bus_id": 128,"stop_id": 3,"stop_name": "Elm Street","next_stop": 5,"stop_type": "","a_time": "08:19"},{"bus_id": 128,"stop_id": 5,"stop_name": "Fifth Avenue","next_stop": 7,"stop_type": "O","a_time": "08:25"},{"bus_id": 128,"stop_id": 7,"stop_name": "Sesame Street","next_stop": 0,"stop_type": "F","a_time": "08:37"},{"bus_id": 256,"stop_id": 2,"stop_name": "Pilotow Street","next_stop": 3,"stop_type": "S","a_time": "09:20"},{"bus_id": 256,"stop_id": 3,"stop_name": "Elm Street","next_stop": 6,"stop_type": "","a_time": "09:45"},{"bus_id": 256,"stop_id": 6,"stop_name": "Sunset Boulevard","next_stop": 7,"stop_type": "","a_time": "09:59"},{"bus_id": 256,"stop_id": 7,"stop_name": "Sesame Street","next_stop": 0,"stop_type": "F","a_time": "10:12"},{"bus_id": 512,"stop_id": 4,"stop_name": "Bourbon Street","next_stop": 6,"stop_type": "S","a_time": "08:13"},{"bus_id": 512,"stop_id": 6,"stop_name": "Sunset Boulevard","next_stop": 0,"stop_type": "F","a_time": "08:16"}],
+      [{"bus_id": 128,"stop_id": 1,"stop_name": "Prospekt Avenue","next_stop": 3,"stop_type": "S","a_time": "08:12"},{"bus_id": 128,"stop_id": 3,"stop_name": "Elm Street","next_stop": 5,"stop_type": "","a_time": "08:19"},{"bus_id": 128,"stop_id": 5,"stop_name": "Fifth Avenue","next_stop": 7,"stop_type": "O","a_time": "08:17"},{"bus_id": 128,"stop_id": 7,"stop_name": "Sesame Street","next_stop": 0,"stop_type": "F","a_time": "08:07"},{"bus_id": 256,"stop_id": 2,"stop_name": "Pilotow Street","next_stop": 3,"stop_type": "S","a_time": "09:20"},{"bus_id": 256,"stop_id": 3,"stop_name": "Elm Street","next_stop": 6,"stop_type": "","a_time": "09:45"},{"bus_id": 256,"stop_id": 6,"stop_name": "Sunset Boulevard","next_stop": 7,"stop_type": "","a_time": "09:44"},{"bus_id": 256,"stop_id": 7,"stop_name": "Sesame Street","next_stop": 0,"stop_type": "F","a_time": "10:12"},{"bus_id": 512,"stop_id": 4,"stop_name": "Bourbon Street","next_stop": 6,"stop_type": "S","a_time": "08:13"},{"bus_id": 512,"stop_id": 6,"stop_name": "Sunset Boulevard","next_stop": 0,"stop_type": "F","a_time": "08:16"}],
+      [{"bus_id": 128,"stop_id": 1,"stop_name": "Prospekt Avenue","next_stop": 3,"stop_type": "S","a_time": "08:12"},{"bus_id": 128,"stop_id": 3,"stop_name": "Elm Street","next_stop": 5,"stop_type": "","a_time": "08:19"},{"bus_id": 128,"stop_id": 5,"stop_name": "Fifth Avenue","next_stop": 7,"stop_type": "O","a_time": "08:25"},{"bus_id": 128,"stop_id": 7,"stop_name": "Sesame Street","next_stop": 0,"stop_type": "","a_time": "08:37"},{"bus_id": 512,"stop_id": 4,"stop_name": "Bourbon Street","next_stop": 6,"stop_type": "S","a_time": "08:13"},{"bus_id": 512,"stop_id": 6,"stop_name": "Sunset Boulevard","next_stop": 0,"stop_type": "F","a_time": "08:16"}],
+      [{"bus_id": 512,"stop_id": 4,"stop_name": "Bourbon Street","next_stop": 6,"stop_type": "S","a_time": "08:13"},{"bus_id": 512,"stop_id": 6,"stop_name": "Sunset Boulevard","next_stop": 0,"stop_type": "F","a_time": "08:16"}],
+      [{"bus_id": 128,"stop_id": 1,"stop_name": "Fifth Avenue","next_stop": 4,"stop_type": "S","a_time": "08:12"},{"bus_id": 128,"stop_id": 4,"stop_name": "Abbey Road","next_stop": 5,"stop_type": "","a_time": "08:19"},{"bus_id": 128,"stop_id": 5,"stop_name": "Santa Monica Boulevard","next_stop": 8,"stop_type": "O","a_time": "08:25"},{"bus_id": 128,"stop_id": 8,"stop_name": "Elm Street","next_stop": 11,"stop_type": "","a_time": "08:37"},{"bus_id": 128,"stop_id": 11,"stop_name": "Beale Street","next_stop": 12,"stop_type": "","a_time": "09:20"},{"bus_id": 128,"stop_id": 12,"stop_name": "Sesame Street","next_stop": 14,"stop_type": "","a_time": "09:45"},{"bus_id": 128,"stop_id": 14,"stop_name": "Bourbon Street","next_stop": 19,"stop_type": "O","a_time": "09:59"},{"bus_id": 128,"stop_id": 19,"stop_name": "Prospekt Avenue","next_stop": 0,"stop_type": "F","a_time": "10:12"},{"bus_id": 256,"stop_id": 2,"stop_name": "Pilotow Street","next_stop": 3,"stop_type": "S","a_time": "08:13"},{"bus_id": 256,"stop_id": 3,"stop_name": "Startowa Street","next_stop": 8,"stop_type": "","a_time": "08:16"},{"bus_id": 256,"stop_id": 8,"stop_name": "Elm Street","next_stop": 10,"stop_type": "","a_time": "08:29"},{"bus_id": 256,"stop_id": 10,"stop_name": "Lombard Street","next_stop": 12,"stop_type": "","a_time": "08:28"},{"bus_id": 256,"stop_id": 12,"stop_name": "Sesame Street","next_stop": 13,"stop_type": "O","a_time": "08:27"},{"bus_id": 256,"stop_id": 13,"stop_name": "Orchard Road","next_stop": 16,"stop_type": "","a_time": "08:42"},{"bus_id": 256,"stop_id": 16,"stop_name": "Sunset Boulevard","next_stop": 17,"stop_type": "O","a_time": "09:26"},{"bus_id": 256,"stop_id": 17,"stop_name": "Khao San Road","next_stop": 20,"stop_type": "O","a_time": "10:25"},{"bus_id": 256,"stop_id": 20,"stop_name": "Michigan Avenue","next_stop": 0,"stop_type": "F","a_time": "11:26"},{"bus_id": 512,"stop_id": 6,"stop_name": "Arlington Road","next_stop": 7,"stop_type": "S","a_time": "11:06"},{"bus_id": 512,"stop_id": 7,"stop_name": "Parizska Street","next_stop": 8,"stop_type": "","a_time": "11:15"},{"bus_id": 512,"stop_id": 8,"stop_name": "Elm Street","next_stop": 9,"stop_type": "","a_time": "11:06"},{"bus_id": 512,"stop_id": 9,"stop_name": "Niebajka Avenue","next_stop": 15,"stop_type": "","a_time": "12:20"},{"bus_id": 512,"stop_id": 15,"stop_name": "Jakis Street","next_stop": 16,"stop_type": "","a_time": "12:44"},{"bus_id": 512,"stop_id": 16,"stop_name": "Sunset Boulevard","next_stop": 18,"stop_type": "","a_time": "13:01"},{"bus_id": 512,"stop_id": 18,"stop_name": "Jakas Avenue","next_stop": 19,"stop_type": "","a_time": "14:00"},{"bus_id": 1024,"stop_id": 21,"stop_name": "Karlikowska Avenue","next_stop": 12,"stop_type": "S","a_time": "13:01"},{"bus_id": 1024,"stop_id": 12,"stop_name": "Sesame Street","next_stop": 0,"stop_type": "F","a_time": "13:00"},{"bus_id": 512,"stop_id": 19,"stop_name": "Prospekt Avenue","next_stop": 0,"stop_type": "F","a_time": "14:11"}],
+      [{"bus_id": 128,"stop_id": 1,"stop_name": "Prospekt Avenue","next_stop": 3,"stop_type": "S","a_time": "08:12"},{"bus_id": 128,"stop_id": 3,"stop_name": "Elm Street","next_stop": 5,"stop_type": "","a_time": "08:19"},{"bus_id": 128,"stop_id": 5,"stop_name": "Fifth Avenue","next_stop": 7,"stop_type": "O","a_time": "08:17"},{"bus_id": 128,"stop_id": 7,"stop_name": "Sesame Street","next_stop": 0,"stop_type": "F","a_time": "08:07"},{"bus_id": 256,"stop_id": 2,"stop_name": "Pilotow Street","next_stop": 3,"stop_type": "S","a_time": "09:20"},{"bus_id": 256,"stop_id": 3,"stop_name": "Elm Street","next_stop": 6,"stop_type": "","a_time": "09:45"},{"bus_id": 256,"stop_id": 6,"stop_name": "Sunset Boulevard","next_stop": 7,"stop_type": "","a_time": "09:44"},{"bus_id": 256,"stop_id": 7,"stop_name": "Sesame Street","next_stop": 0,"stop_type": "F","a_time": "10:12"},{"bus_id": 512,"stop_id": 4,"stop_name": "Bourbon Street","next_stop": 6,"stop_type": "S","a_time": "08:13"},{"bus_id": 512,"stop_id": 6,"stop_name": "Sunset Boulevard","next_stop": 0,"stop_type": "F","a_time": "08:16"}],
+
+      [{"bus_id": 128,"stop_id": 1,"stop_name": "Prospekt Avenue","next_stop": 3,"stop_type": "S","a_time": "08:12"},{"bus_id": 128,"stop_id": 3,"stop_name": "Elm Street","next_stop": 5,"stop_type": "O","a_time": "08:19"},{"bus_id": 128,"stop_id": 5,"stop_name": "Fifth Avenue","next_stop": 7,"stop_type": "O","a_time": "08:25"},{"bus_id": 128,"stop_id": 7,"stop_name": "Sesame Street","next_stop": 0,"stop_type": "F","a_time": "08:37"},{"bus_id": 256,"stop_id": 2,"stop_name": "Pilotow Street","next_stop": 3,"stop_type": "S","a_time": "09:20"},{"bus_id": 256,"stop_id": 3,"stop_name": "Elm Street","next_stop": 6,"stop_type": "","a_time": "09:45"},{"bus_id": 256,"stop_id": 6,"stop_name": "Sunset Boulevard","next_stop": 7,"stop_type": "O","a_time": "09:59"},{"bus_id": 256,"stop_id": 7,"stop_name": "Sesame Street","next_stop": 0,"stop_type": "F","a_time": "10:12"},{"bus_id": 512,"stop_id": 4,"stop_name": "Bourbon Street","next_stop": 6,"stop_type": "S","a_time": "08:13"},{"bus_id": 512,"stop_id": 6,"stop_name": "Sunset Boulevard","next_stop": 0,"stop_type": "F","a_time": "08:16"}],
+      [{"bus_id": 512,"stop_id": 4,"stop_name": "Bourbon Street","next_stop": 6,"stop_type": "S","a_time": "08:13"},{"bus_id": 512,"stop_id": 6,"stop_name": "Sunset Boulevard","next_stop": 0,"stop_type": "F","a_time": "08:16"}]
+    ]
+  learner_created: true
+- name: easyrider/stage.py
+  visible: true
+  learner_created: true
+- name: easyrider/screens/failed data.png
+  visible: true
+  learner_created: true
+feedback_link: https://hyperskill.org/learn/step/10893#comment
+status: Solved
+feedback:
+  message: Well done! You've finished the project. Select a new project on <a href="https://hyperskill.org/projects">JetBrains
+    Academy</a> to continue learning.
+  time: Tue, 28 Jun 2022 07:16:56 UTC
 record: -1

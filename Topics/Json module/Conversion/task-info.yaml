@@ -1,0 +1,18 @@
+type: choice
+is_multiple_choice: false
+options:
+- text: array
+- text: list
+- text: <code>TypeError</code> will be raised!
+- text: "null"
+- text: object
+files:
+- name: main.py
+  visible: true
+  text: |+
+    #  You can experiment here, it won’t be checked
+
+  learner_created: false
+feedback_link: https://hyperskill.org/learn/step/9000#comment
+status: Solved
+record: -1
