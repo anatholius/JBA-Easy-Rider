@@ -1,6 +1,10 @@
+"""
+Run program with `-t` or `--test` parameter to use predefined `test_data.json`
+for testing locally
+"""
+
 import argparse
 import json
-# from scheduler import Scheduler
 import sys
 
 from entity.schedule import Schedule
@@ -47,19 +51,16 @@ class Scheduler:
         line_id = spec['bus_id']
         if line_id in self.lines:
             schedule = self.lines[line_id]
-            trace = schedule.trace
             stop = Stop(spec)
-            stops = trace.stops
-            time_0 = stops[-1].lines[line_id][-1]
-            time_1 = spec['a_time']
-            time_correct = time_0 < time_1
-            if not time_correct:
+            prev_stop_time = schedule.trace.stops[-1].lines[line_id][-1]
+            current_stop_time = spec['a_time']
+            if prev_stop_time >= current_stop_time:
                 message = 'bus_id line {}: wrong time on station {}'.format(
                     line_id,
                     stop.stop_name
                 )
-                trace.messages.append(message)
-            trace.add_stop(stop, line_id, time_1)
+                schedule.trace.messages.append(message)
+            schedule.trace.add_stop(stop, line_id, current_stop_time)
         else:
             schedule = Schedule(spec)
 
@@ -73,12 +74,12 @@ class Scheduler:
 
                 for data in tests:
                     self.init(data)
-                    self.show()
+                    self.report()
         else:
             entry = json.loads(input())
-            self.init(entry).show()
+            self.init(entry).report()
 
-    def show(self):
+    def report(self):
         messages = []
         for schedule in self.lines.values():
             if len(schedule.trace.messages):

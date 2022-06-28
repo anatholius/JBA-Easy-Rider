@@ -1,17 +1,11 @@
 class Stop:
-    def __init__(self, spec, line=None):
+    def __init__(self, spec):
         self.stop_id = spec['stop_id']
         self.stop_name = spec['stop_name']
-        line = spec['bus_id']
-        time = spec['a_time']
 
         self.lines = {}
-        # if line is not None and line['bus_id'] not in self.lines:
-        # if line is not None:
-        if line not in self.lines.keys():
-            self.lines[line] = []
-        # self.lines[line].append(time)
-        # line.trace.add_stop(self)
+        if spec['bus_id'] not in self.lines.keys():
+            self.lines[spec['bus_id']] = []
 
     def __str__(self, line_id: int = None):
         if line_id is not None:
@@ -27,10 +21,3 @@ class Stop:
                     self.lines.items()
                 ])
             )
-
-    # def hours(self, line_id):
-    #     # [print(line.__str__()) for line in self.lines]
-    #     print('self.lines', self.lines)
-    #     exit(f'What hours are for bus {line_id} on stop {self.stop_id}')
-
-# print('__name__', __name__)
