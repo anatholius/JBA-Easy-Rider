@@ -1,3 +1,8 @@
 content:
 - Theory
 - Letters of a word
+- Defining a generator
+- Two instances of the same generator
+- Lazy evaluation
+- Generators vs lists
+- Fortuneteller

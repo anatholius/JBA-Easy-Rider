@@ -1,0 +1,17 @@
+type: choice
+is_multiple_choice: false
+options:
+- text: A - generator, B - list
+- text: A - list, B - generator
+- text: odd is a list in both cases
+- text: odd is a generator in both cases
+files:
+- name: main.py
+  visible: true
+  text: |+
+    #  You can experiment here, it won’t be checked
+
+  learner_created: false
+feedback_link: https://hyperskill.org/learn/step/8272#comment
+status: Solved
+record: -1
