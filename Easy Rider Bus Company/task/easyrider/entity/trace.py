@@ -6,7 +6,7 @@ class Trace:
     def __init__(self):
         self._index = 0
         self.messages = []
-        self.stops: list[Stop] | list = []
+        self.stops: [Stop] | list = []
 
     def __next__(self):
         if self._index < len(self.stops):

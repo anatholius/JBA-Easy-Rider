@@ -22,9 +22,9 @@ class Schedule:
 
     def show(self, stop_id: str | None = None):
         if stop_id is None:
-            return f'{self.line.show()}'
+            return ', '.join([f'{stop}' for stop in self.trace.stops])
         else:
-            return [stop for stop in self.line.trace.stops][0]
+            return [stop for stop in self.trace.stops][0]
 
     def add(self, spec):
         self.trace.add_stop(Stop(spec), spec['bus_id'], spec['a_time'])

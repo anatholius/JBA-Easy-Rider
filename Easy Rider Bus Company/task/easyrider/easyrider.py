@@ -10,17 +10,28 @@ import sys
 from entity.schedule import Schedule
 from entity.stop import Stop
 from spec import Spec
+from stage import Stage
 
 
 class Scheduler:
     lines = {}
+    stops = {}
+
+    def stage(self, no: int):
+        stage = Stage(no)
+        stage.lines = self.lines
+        stage.stops = self.stops
+        return stage
 
     def init(self, data: [dict]):
+        self.lines = {}
+        self.stops = {}
         for item in data:
             spec = Spec()
             if spec.check(item):
                 self.add_place(item)
             else:
+                # incorrect data for schedule
                 def errors(field):
                     if spec.errors[field] > 0:
                         suffix = 'Errors: ' if (
@@ -45,15 +56,23 @@ class Scheduler:
                         ]),
                         '}'
                     ]), file=sys.stderr)
+
         return self
 
     def add_place(self, spec: dict):
         line_id = spec['bus_id']
+        current_stop_time = spec['a_time']
         if line_id in self.lines:
             schedule = self.lines[line_id]
-            stop = Stop(spec)
+
+            if spec['stop_id'] not in self.stops.keys():
+                stop = Stop(spec)
+                self.stops[stop.stop_id] = stop
+            else:
+                stop: Stop = self.stops[spec['stop_id']]
+                stop.add_line(spec)
             prev_stop_time = schedule.trace.stops[-1].lines[line_id][-1]
-            current_stop_time = spec['a_time']
+            # check time departure <-> arrive between stops
             if prev_stop_time >= current_stop_time:
                 message = 'bus_id line {}: wrong time on station {}'.format(
                     line_id,
@@ -63,6 +82,12 @@ class Scheduler:
             schedule.trace.add_stop(stop, line_id, current_stop_time)
         else:
             schedule = Schedule(spec)
+            if spec['stop_id'] not in self.stops.keys():
+                stop = Stop(spec)
+                self.stops[stop.stop_id] = stop
+            else:
+                stop: Stop = self.stops[spec['stop_id']]
+                stop.add_line(spec)
 
         if schedule.line not in self.lines.keys():
             self.lines[line_id] = schedule
@@ -74,22 +99,11 @@ class Scheduler:
 
                 for data in tests:
                     self.init(data)
-                    self.report()
+                    self.stage(6).report()
         else:
             entry = json.loads(input())
-            self.init(entry).report()
-
-    def report(self):
-        messages = []
-        for schedule in self.lines.values():
-            if len(schedule.trace.messages):
-                messages.append(schedule.trace.messages[0])
-
-        print('Arrival time test:')
-        if messages:
-            print('\n'.join(messages))
-        else:
-            print('OK')
+            self.init(entry)
+            self.stage(6).report()
 
 
 parser = argparse.ArgumentParser()
