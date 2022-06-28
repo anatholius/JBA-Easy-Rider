@@ -393,9 +393,6 @@ files:
 - name: easyrider/stage.py
   visible: true
   learner_created: true
-- name: easyrider/screens/failed data.png
-  visible: true
-  learner_created: true
 feedback_link: https://hyperskill.org/learn/step/10893#comment
 status: Solved
 feedback:
