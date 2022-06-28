@@ -35,7 +35,6 @@ class Stop:
 
     def add_line(self, spec):
         self.lines[spec['bus_id']] = []
-        print(f'Added line to stop "{self.stop_name}"', len(self.lines.keys()))
         if len(self.lines.keys()) > 1:
             self.transfer = True
         if self.transfer and self.on_demand:

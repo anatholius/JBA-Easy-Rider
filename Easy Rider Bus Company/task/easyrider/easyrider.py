@@ -10,11 +10,18 @@ import sys
 from entity.schedule import Schedule
 from entity.stop import Stop
 from spec import Spec
+from stage import Stage
 
 
 class Scheduler:
     lines = {}
     stops = {}
+
+    def stage(self, no: int):
+        stage = Stage(no)
+        stage.lines = self.lines
+        stage.stops = self.stops
+        return stage
 
     def init(self, data: [dict]):
         self.lines = {}
@@ -53,10 +60,6 @@ class Scheduler:
         return self
 
     def add_place(self, spec: dict):
-        """
-        transfer_stop
-        on_demand_stop
-        """
         line_id = spec['bus_id']
         current_stop_time = spec['a_time']
         if line_id in self.lines:
@@ -94,41 +97,13 @@ class Scheduler:
             with open('test_data.json') as test:
                 tests = json.loads(test.read())
 
-                for i, data in enumerate(tests):
-                    if i + 1 < 13:
-                        continue
-                    print(f'\nTest #{i + 1}')
+                for data in tests:
                     self.init(data)
-                    self.report_timing()
-                    self.report_stops()
+                    self.stage(6).report()
         else:
             entry = json.loads(input())
             self.init(entry)
-            self.report_timing()
-            self.report_stops()
-
-    def report_timing(self):
-        messages = []
-        for schedule in self.lines.values():
-            if len(schedule.trace.messages):
-                messages.append(schedule.trace.messages[0])
-
-        print('Arrival time test:')
-        if messages:
-            print('\n'.join(messages))
-        else:
-            print('OK')
-
-    def report_stops(self):
-        wrong_types = [
-            stop.stop_name
-            for stop_id, stop in self.stops.items()
-            if stop.has_wrong_type()
-        ]
-        if len(wrong_types):
-            print('\n'.join(['On demand stops test:', 'OK']))
-        else:
-            print()
+            self.stage(6).report()
 
 
 parser = argparse.ArgumentParser()
