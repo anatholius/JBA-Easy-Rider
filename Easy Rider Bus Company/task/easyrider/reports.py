@@ -1,4 +1,8 @@
 class Reports:
+    """
+    Deprecated since stage 5/6
+    """
+
     def __init__(self, errors):
         self.errors = errors
         self.correct_data = []

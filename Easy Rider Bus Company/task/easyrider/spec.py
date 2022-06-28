@@ -99,7 +99,6 @@ class Spec:
         for name, value in object_.items():
             if self.is_satisfied_by(name, value):
                 valid_schedule = False
-            continue
 
         # Previous stages reports
         if self.report_support:
