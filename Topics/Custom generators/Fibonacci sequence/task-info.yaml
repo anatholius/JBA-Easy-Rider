@@ -1,0 +1,14 @@
+type: code
+files:
+- name: main.py
+  visible: true
+  text: |-
+    def fibonacci(n):
+        yield ...
+  learner_created: false
+feedback_link: https://hyperskill.org/learn/step/8277#comment
+status: Solved
+feedback:
+  message: <html>Correct solution</html>
+  time: Tue, 28 Jun 2022 08:33:22 UTC
+record: -1
