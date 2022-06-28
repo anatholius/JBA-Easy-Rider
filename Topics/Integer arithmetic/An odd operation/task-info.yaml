@@ -1,0 +1,19 @@
+type: choice
+is_multiple_choice: false
+options:
+- text: The remainder of division
+- text: Raising to power
+- text: Unary minus
+- text: Integer division
+- text: Division
+- text: Square root
+files:
+- name: main.py
+  visible: true
+  text: |+
+    #  You can experiment here, it won’t be checked
+
+  learner_created: false
+feedback_link: https://hyperskill.org/learn/step/6887#comment
+status: Solved
+record: -1
