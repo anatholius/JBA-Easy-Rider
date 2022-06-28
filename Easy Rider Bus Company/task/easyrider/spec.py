@@ -35,6 +35,7 @@ class Spec:
     }
 
     def __init__(self):
+        self.error_messages = {}
         self.rtf = {
             "start": [],
             "transfer": {},
@@ -82,19 +83,46 @@ class Spec:
     def is_important(name):
         return name in ('stop_name', 'stop_type', 'a_time')
 
-    def is_satisfied_by(self, name, value) -> int:
-        return int(bool(
-            # check spec `type`
-            type(value) != self.requirements[name]['type']
-            or
-            # check spec `required`
-            'required' in self.requirements[name] and
-            self.requirements[name]['required'] and not len(str(value))
-            or
-            # check value `match` spec format
-            'match' in self.requirements[name] and
-            self.requirements[name]['match'](str(value))
-        ))
+    def is_satisfied_by(self, name, value) -> bool:
+        """
+        Pattern: Specification.
+
+        Checks basic propriety conditions:
+         - type,
+         - correct value if required
+         - match regex conditions specified in spec requirements for field
+
+        When spec is not satisfied by given value, function increases field
+        errors count
+        """
+
+        # check spec `type`
+        incorrect_type = type(value) != self.requirements[name]['type']
+        # check spec `required`
+        incorrect_required = (
+                'required' in self.requirements[name] and
+                self.requirements[name]['required'] and not len(str(value))
+        )
+        # check value `match` spec format
+        incorrect_regex = (
+                'match' in self.requirements[name] and
+                self.requirements[name]['match'](str(value))
+        )
+        has_errors = bool(
+            incorrect_type or incorrect_required or incorrect_regex
+        )
+        if has_errors:
+            self.error_messages[name] = []
+            if incorrect_type:
+                self.error_messages[name].append(f'Incorrect type')
+            if incorrect_required:
+                self.error_messages[name].append(f'Missing required value')
+            if incorrect_regex:
+                self.error_messages[name].append(f'Incorrect format')
+
+        self.errors[name] += int(has_errors)
+
+        return has_errors
 
     def check(self, object_: dict) -> bool:
         if self.errors is None:
@@ -102,10 +130,9 @@ class Spec:
 
         valid_schedule = True
         for name, value in object_.items():
-            error = self.is_satisfied_by(name, value)
-            self.errors[name] += error
-            if bool(error):
+            if self.is_satisfied_by(name, value):
                 valid_schedule = False
+            continue
 
         return valid_schedule
         # if object_ is valid schedule

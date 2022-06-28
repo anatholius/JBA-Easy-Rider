@@ -1,4 +1,5 @@
 from entity.schedule import Schedule
+from entity.stop import Stop
 from spec import Spec
 
 
@@ -8,50 +9,42 @@ class Scheduler:
 
         for item in data:
             if Spec().check(item):
-                self.add_schedule(item)
-            else:
-                exit('Something is not valid!')
+                self.add_place(item)
 
-    def show(self):
-        # print('self.lines')
-        # print(self.lines)
-        # exit('exit')
-        has_message = False
-        message = []
-        for schedule in self.lines.values():
-            if schedule.line.trace.message is not None:
-                message.append(schedule.line.trace.message)
-            # else:
-            #     continue
-            # array_scheduler.append(schedule.show())
-            # continue
-
-            # print(schedule.line.trace.message)
-            # print('is True:', schedule.line.trace.message is not None)
-
-
-        # print('Arrival time test:', message)
-        if not message:
-            print('\n'.join(message))
-        else:
-            print('OK')
-            [print((v.show(), v.line.trace.message)) for i, v in self.lines.items()]
-            array_scheduler = []
-            for schedule in self.lines.values():
-                # print('schedule', schedule.show())
-                array_scheduler.append(schedule.show())
-                # print('\n'.join(array_scheduler))
-
-    def add_schedule(self, spec: dict):
-        if spec['bus_id'] in self.lines:
-            schedule = self.lines[spec['bus_id']]
-            schedule.add(spec)
-            print(schedule.show())
+    def add_place(self, spec: dict):
+        line_id = spec['bus_id']
+        if line_id in self.lines:
+            schedule = self.lines[line_id]
+            trace = schedule.trace
+            stop = Stop(spec)
+            stops = trace.stops
+            time_0 = stops[-1].lines[line_id][-1]
+            time_1 = spec['a_time']
+            time_correct = time_0 < time_1
+            if not time_correct:
+                message = 'bus_id line {}: wrong time on station {}'.format(
+                    line_id,
+                    stop.stop_name
+                )
+                trace.messages.append(message)
+            trace.add_stop(stop, line_id, time_1)
         else:
             schedule = Schedule(spec)
 
-        if schedule.line.bus_id not in self.lines.keys():
-            self.lines[schedule.line.bus_id] = schedule
+        if schedule.line not in self.lines.keys():
+            self.lines[line_id] = schedule
+
+    def show(self):
+        messages = []
+        for schedule in self.lines.values():
+            if len(schedule.trace.messages):
+                messages.append(schedule.trace.messages[0])
+
+        print('Arrival time test:')
+        if messages:
+            print('\n'.join(messages))
+        else:
+            print('OK')
 
     # def validate(self, data):
     #     self.spec = Spec()
@@ -101,6 +94,5 @@ class Scheduler:
     #         self.spec.report()
 
 
-# print('__name__', __name__)
 if __name__ == '__main__':
-    exit('No direct instantiation!')
+    exit('Unavailable direct execution!')

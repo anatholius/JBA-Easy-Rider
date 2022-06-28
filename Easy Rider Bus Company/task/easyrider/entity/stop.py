@@ -2,13 +2,16 @@ class Stop:
     def __init__(self, spec, line=None):
         self.stop_id = spec['stop_id']
         self.stop_name = spec['stop_name']
+        line = spec['bus_id']
+        time = spec['a_time']
+
         self.lines = {}
         # if line is not None and line['bus_id'] not in self.lines:
-        if line is not None:
-            if line.bus_id not in self.lines:
-                self.lines[line.bus_id] = []
-            self.lines[line.bus_id].append(spec['a_time'])
-            line.trace.add_stop(self)
+        # if line is not None:
+        if line not in self.lines.keys():
+            self.lines[line] = []
+        # self.lines[line].append(time)
+        # line.trace.add_stop(self)
 
     def __str__(self, line_id: int = None):
         if line_id is not None:
